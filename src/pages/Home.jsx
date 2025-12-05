@@ -132,7 +132,7 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + Math.ceil(slidingProducts.length / 4)) % Math.ceil(slidingProducts.length / 4));
 
   return (
-    <div className="min-h-screen bg-[#ACC8E5]">
+    <div className="min-h-screen bg-white">
       <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
 
       {/* Scrolling Promo Banner */}
@@ -163,31 +163,31 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-[#ACC8E5]">
+      <section className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-black">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
               Your Trusted Partner in Business Technology
             </h1>
-            <p className="text-lg text-gray-700 mb-8">
+            <p className="text-lg text-gray-400 mb-8">
               Premium biometric devices, GPS trackers, printers, and Aadhaar kits
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => navigate('/products')}
-                className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+                className="px-8 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
               >
                 Shop Now
               </button>
               <button
                 onClick={() => navigate('/track')}
-                className="px-8 py-3 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition"
+                className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
               >
                 Track Order
               </button>
               <button
                 onClick={() => navigate('/about')}
-                className="px-8 py-3 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition"
+                className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
               >
                 Learn More
               </button>
@@ -197,7 +197,7 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       </section>
 
       {/* Product Slider Section */}
-      <section className="border-b bg-white py-5">
+      <section className="border-b bg-gray-50 py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
