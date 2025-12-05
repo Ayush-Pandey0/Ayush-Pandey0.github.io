@@ -609,24 +609,25 @@ export default function ProductManager() {
 
                     {/* Image Upload */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
                       <div className="space-y-3">
-                        {imagePreview ? (
-                          <div className="relative inline-block">
-                            <img 
-                              src={imagePreview} 
-                              alt="Preview" 
-                              className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                            />
-                            <button
-                              type="button"
-                              onClick={removeImage}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
+                        <div className="flex gap-2 flex-wrap">
+                          {formData.images.length > 0 && formData.images.map((img, idx) => (
+                            <div key={idx} className="relative inline-block">
+                              <img 
+                                src={img} 
+                                alt={`Preview ${idx + 1}`} 
+                                className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(idx)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
                           <div 
                             onClick={() => fileInputRef.current?.click()}
                             className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition"
@@ -636,19 +637,20 @@ export default function ProductManager() {
                             ) : (
                               <>
                                 <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                                <span className="text-xs text-gray-500">Upload Image</span>
+                                <span className="text-xs text-gray-500">Upload Images</span>
                               </>
                             )}
                           </div>
-                        )}
+                        </div>
                         <input
                           ref={fileInputRef}
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={handleImageUpload}
                           className="hidden"
                         />
-                        <p className="text-xs text-gray-500">Max size: 5MB. Supported: JPG, PNG, GIF</p>
+                        <p className="text-xs text-gray-500">Max size: 5MB each. Supported: JPG, PNG, GIF. You can add multiple images.</p>
                       </div>
                     </div>
                   </div>
