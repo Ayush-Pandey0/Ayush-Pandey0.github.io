@@ -1,4 +1,4 @@
-import { ShoppingBag, Truck, Shield, Headphones, Star, ChevronLeft, ChevronRight, TrendingUp, Sparkles } from 'lucide-react';
+import { ShoppingBag, Truck, Shield, Headphones, Star, ChevronLeft, ChevronRight, TrendingUp, Sparkles, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../config/api';
 import Navbar from '../components/Navbar';
@@ -7,6 +7,13 @@ import { useNavigate, Link } from 'react-router-dom';
 
 export default function Home({ isAuthenticated, setIsAuthenticated }) {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    totalProductsSold: 0,
+    citiesServed: 0,
+    avgRating: 0
+  });
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -14,17 +21,54 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
 
   useEffect(() => {
     fetchFeaturedItems();
+    fetchReviews();
+    fetchStats();
   }, []);
 
   const fetchFeaturedItems = async () => {
     try {
       const response = await api.get('/products?featured=true');
-      setFeaturedProducts(response.data.slice(0, 6));
+      // Show 3 featured products, or if no featured products, show first 3 products
+      let products = response.data;
+      if (!products || products.length === 0) {
+        const allProducts = await api.get('/products');
+        products = allProducts.data;
+      }
+      setFeaturedProducts(products.slice(0, 3));
     } catch (error) {
       console.error('Failed to load products:', error);
       setFeaturedProducts([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await api.get('/reviews');
+      // Get the 3 most recent approved reviews
+      const approvedReviews = (response.data || [])
+        .filter(r => r.status === 'approved' || !r.status)
+        .slice(0, 3);
+      setReviews(approvedReviews);
+    } catch (error) {
+      console.error('Failed to load reviews:', error);
+      setReviews([]);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/stats');
+      setStats({
+        totalCustomers: response.data.totalCustomers || 0,
+        totalProductsSold: response.data.totalProductsSold || 0,
+        citiesServed: response.data.citiesServed || 0,
+        avgRating: response.data.avgRating || 0
+      });
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+      // Keep default values
     }
   };
 
@@ -88,7 +132,7 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + Math.ceil(slidingProducts.length / 4)) % Math.ceil(slidingProducts.length / 4));
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#ACC8E5]">
       <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
 
       {/* Scrolling Promo Banner */}
@@ -119,31 +163,31 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-gray-900 text-white">
+      <section className="bg-[#ACC8E5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-black">
               Your Trusted Partner in Business Technology
             </h1>
-            <p className="text-lg text-gray-400 mb-8">
+            <p className="text-lg text-gray-700 mb-8">
               Premium biometric devices, GPS trackers, printers, and Aadhaar kits
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => navigate('/products')}
-                className="px-8 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition"
               >
                 Shop Now
               </button>
               <button
                 onClick={() => navigate('/track')}
-                className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+                className="px-8 py-3 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition"
               >
                 Track Order
               </button>
               <button
                 onClick={() => navigate('/about')}
-                className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+                className="px-8 py-3 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition"
               >
                 Learn More
               </button>
@@ -153,7 +197,7 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       </section>
 
       {/* Product Slider Section */}
-      <section className="border-b bg-gray-50 py-5">
+      <section className="border-b bg-white py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -248,25 +292,6 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center mb-4 text-black">Shop by Category</h2>
-        <p className="text-center text-black mb-12">Browse our wide range of business technology products</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-          {categories.map((cat) => (
-            <div
-              key={cat.name}
-              onClick={() => navigate(`/products?category=${encodeURIComponent(cat.name)}`)}
-              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-900 p-6 rounded-xl cursor-pointer text-center transition-all hover:shadow-lg"
-            >
-              <div className="text-4xl mb-3">{cat.icon}</div>
-              <h3 className="font-bold text-sm text-black mb-1">{cat.name}</h3>
-              <p className="text-sm text-black">{cat.count} Products</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Featured Products */}
       <section className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -340,49 +365,64 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       {/* Testimonials */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">Customer Reviews</h2>
-        <p className="text-gray-500 text-center mb-10">Trusted by 10,000+ businesses</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { name: 'Rajesh Kumar', company: 'TechSoft Solutions', review: 'Excellent quality biometric devices! Fast delivery and great after-sales support.', rating: 5 },
-            { name: 'Priya Sharma', company: 'GlobalTrack Logistics', review: 'The GPS trackers are accurate and reliable. Very responsive customer service.', rating: 5 },
-            { name: 'Amit Patel', company: 'SecureID Services', review: 'Been using their Aadhaar kits for 2 years. Quality products at competitive prices.', rating: 4 }
-          ].map((testimonial) => (
-            <div key={testimonial.name} className="bg-white border border-gray-200 p-6 rounded-lg">
-              <div className="flex mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < testimonial.rating ? 'text-amber-500 fill-current' : 'text-gray-200'}`} />
-                ))}
-              </div>
-              <p className="text-gray-600 mb-4 text-sm">"{testimonial.review}"</p>
-              <div className="flex items-center">
-                <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-gray-700 font-semibold text-sm">{testimonial.name.charAt(0)}</span>
+        <p className="text-gray-500 text-center mb-10">What our customers say about us</p>
+        {reviews.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-xl">
+            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg font-medium">No reviews yet</p>
+            <p className="text-gray-400 text-sm mt-2">Be the first to review our products!</p>
+            <button
+              onClick={() => navigate('/products')}
+              className="mt-4 px-6 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+            >
+              Browse Products
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {reviews.map((review) => (
+              <div key={review._id} className="bg-white border border-gray-200 p-6 rounded-lg">
+                <div className="flex mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-amber-500 fill-current' : 'text-gray-200'}`} />
+                  ))}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">{testimonial.name}</p>
-                  <p className="text-xs text-gray-500">{testimonial.company}</p>
+                <p className="text-gray-600 mb-4 text-sm">"{review.comment || review.text || 'Great product!'}"</p>
+                <div className="flex items-center">
+                  <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-gray-700 font-semibold text-sm">{(review.userName || review.user?.fullname || 'A').charAt(0).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm">{review.userName || review.user?.fullname || 'Anonymous'}</p>
+                    <p className="text-xs text-gray-500">{review.productName || 'Verified Buyer'}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Stats */}
       <section className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { number: '10,000+', label: 'Happy Customers' },
-              { number: '50,000+', label: 'Products Sold' },
-              { number: '500+', label: 'Cities Served' },
-              { number: '4.8/5', label: 'Customer Rating' }
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-3xl md:text-4xl font-bold mb-1">{stat.number}</div>
-                <div className="text-gray-400 text-sm">{stat.label}</div>
-              </div>
-            ))}
+            <div>
+              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.totalCustomers > 0 ? `${stats.totalCustomers.toLocaleString()}+` : '0'}</div>
+              <div className="text-gray-400 text-sm">Happy Customers</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.totalProductsSold > 0 ? `${stats.totalProductsSold.toLocaleString()}+` : '0'}</div>
+              <div className="text-gray-400 text-sm">Products Sold</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.citiesServed > 0 ? `${stats.citiesServed}+` : '0'}</div>
+              <div className="text-gray-400 text-sm">Cities Served</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.avgRating > 0 ? `${stats.avgRating.toFixed(1)}/5` : '0/5'}</div>
+              <div className="text-gray-400 text-sm">Customer Rating</div>
+            </div>
           </div>
         </div>
       </section>
