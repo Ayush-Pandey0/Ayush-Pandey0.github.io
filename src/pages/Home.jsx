@@ -160,10 +160,10 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
             animation: scrollCenter 4s ease-in-out;
           }
           @keyframes typing {
-            0% { 
+            0%, 100% { 
               max-width: 0;
             }
-            50%, 100% { 
+            40%, 60% { 
               max-width: 100%;
             }
           }
@@ -177,9 +177,8 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
             white-space: nowrap;
             overflow: hidden;
             border-right: 3px solid #00D8EC;
-            animation: typing 3s steps(19) forwards, blink 0.7s step-end infinite;
-            vertical-align: bottom;
-            line-height: 1.2;
+            animation: typing 6s steps(19) infinite, blink 0.7s step-end infinite;
+            padding-bottom: 0.1em;
           }
         `}</style>
       </div>
