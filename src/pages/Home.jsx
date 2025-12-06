@@ -159,6 +159,25 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
           .animate-scrollCenter {
             animation: scrollCenter 4s ease-in-out;
           }
+          @keyframes typing {
+            0% { 
+              width: 0;
+              border-right-color: #00D8EC;
+            }
+            50% { 
+              width: 100%;
+              border-right-color: #00D8EC;
+            }
+            50.1%, 100% {
+              width: 100%;
+              border-right-color: transparent;
+            }
+          }
+          .animate-typing {
+            width: 0;
+            white-space: nowrap;
+            animation: typing 4s steps(20) infinite;
+          }
         `}</style>
       </div>
 
@@ -167,7 +186,13 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              Your Trusted Partner in Business Technology
+              Your Trusted Partner in
+              <span className="block mt-2">
+                <span className="inline-block overflow-hidden border-r-4 animate-typing" 
+                      style={{color: '#00D8EC', borderColor: '#00D8EC'}}>
+                  Business Technology
+                </span>
+              </span>
             </h1>
             <p className="text-lg text-gray-400 mb-8">
               Premium biometric devices, GPS trackers, printers, and Aadhaar kits
