@@ -1,5 +1,6 @@
 import { ShoppingBag, Truck, Shield, Headphones, Star, ChevronLeft, ChevronRight, TrendingUp, Sparkles, MessageSquare } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import api from '../config/api';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
@@ -17,6 +18,9 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [animatedStats, setAnimatedStats] = useState({ customers: 0, products: 0, cities: 0, rating: 0 });
+  const [statsVisible, setStatsVisible] = useState(false);
+  const statsRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,6 +28,42 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
     fetchReviews();
     fetchStats();
   }, []);
+
+  // Intersection Observer for stats animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !statsVisible) {
+          setStatsVisible(true);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => observer.disconnect();
+  }, [statsVisible]);
+
+  // Animate counting when stats become visible
+  useEffect(() => {
+    if (statsVisible && stats.totalCustomers > 0) {
+      const duration = 2000;
+      const steps = 60;
+      const interval = duration / steps;
+      let step = 0;
+      const timer = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        setAnimatedStats({
+          customers: Math.floor(stats.totalCustomers * progress),
+          products: Math.floor(stats.totalProductsSold * progress),
+          cities: Math.floor(stats.citiesServed * progress),
+          rating: parseFloat((stats.avgRating * progress).toFixed(1))
+        });
+        if (step >= steps) clearInterval(timer);
+      }, interval);
+      return () => clearInterval(timer);
+    }
+  }, [statsVisible, stats]);
 
   const fetchFeaturedItems = async () => {
     try {
@@ -175,10 +215,10 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
             display: inline-block;
             max-width: 0;
             white-space: nowrap;
-            overflow: hidden;
+            overflow: visible;
             border-right: 3px solid #00D8EC;
             animation: typing 6s steps(19) infinite, blink 0.7s step-end infinite;
-            padding-bottom: 0.1em;
+            line-height: 1.3;
           }
         `}</style>
       </div>
@@ -187,9 +227,9 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       <section className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6" style={{lineHeight: '1.3'}}>
               Your Trusted Partner in
-              <span className="block mt-2">
+              <span className="block mt-2" style={{minHeight: '1.3em'}}>
                 <span className="animate-typing" style={{color: '#00D8EC'}}>
                   Business Technology
                 </span>
@@ -199,24 +239,39 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
               Premium biometric devices, GPS trackers, printers, and Aadhaar kits
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <button
+              <motion.button
                 onClick={() => navigate('/products')}
                 className="px-8 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(255,255,255,0.2)' }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
               >
                 Shop Now
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => navigate('/track')}
                 className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+                whileHover={{ scale: 1.05, borderColor: '#00D8EC' }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
               >
                 Track Order
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => navigate('/about')}
                 className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+                whileHover={{ scale: 1.05, borderColor: '#00D8EC' }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
               >
                 Learn More
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -430,25 +485,41 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
       </section>
 
       {/* Stats */}
-      <section className="bg-gray-900 text-white py-12">
+      <section ref={statsRef} className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.totalCustomers > 0 ? `${stats.totalCustomers.toLocaleString()}+` : '0'}</div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={statsVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="text-3xl md:text-4xl font-bold mb-1 text-cyan-400">{animatedStats.customers > 0 ? `${animatedStats.customers.toLocaleString()}+` : '0'}</div>
               <div className="text-gray-400 text-sm">Happy Customers</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.totalProductsSold > 0 ? `${stats.totalProductsSold.toLocaleString()}+` : '0'}</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={statsVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="text-3xl md:text-4xl font-bold mb-1 text-cyan-400">{animatedStats.products > 0 ? `${animatedStats.products.toLocaleString()}+` : '0'}</div>
               <div className="text-gray-400 text-sm">Products Sold</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.citiesServed > 0 ? `${stats.citiesServed}+` : '0'}</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={statsVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="text-3xl md:text-4xl font-bold mb-1 text-cyan-400">{animatedStats.cities > 0 ? `${animatedStats.cities}+` : '0'}</div>
               <div className="text-gray-400 text-sm">Cities Served</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold mb-1">{stats.avgRating > 0 ? `${stats.avgRating.toFixed(1)}/5` : '0/5'}</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={statsVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="text-3xl md:text-4xl font-bold mb-1 text-cyan-400">{animatedStats.rating > 0 ? `${animatedStats.rating.toFixed(1)}/5` : '0/5'}</div>
               <div className="text-gray-400 text-sm">Customer Rating</div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
