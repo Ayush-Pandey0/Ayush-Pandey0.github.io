@@ -464,18 +464,6 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
         </div>
       </section>
 
-      {/* Brands */}
-      <section className="border-t py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-400 text-sm mb-6">Trusted by leading brands</p>
-          <div className="flex flex-wrap justify-center items-center gap-10 opacity-50">
-            {['Mantra', 'Startek', 'Morpho', 'SecuGen', 'Suprema', 'HID Global'].map((brand) => (
-              <div key={brand} className="text-xl font-bold text-gray-400">{brand}</div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
