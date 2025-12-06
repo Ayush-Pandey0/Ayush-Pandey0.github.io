@@ -6,15 +6,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 
-// Category icons and colors
+// Category icons and colors - consistent indigo theme
 const categoryConfig = {
-  'Biometric Devices': { icon: Cpu, color: 'from-purple-500 to-indigo-600', bg: 'bg-purple-50', text: 'text-purple-600' },
-  'GPS Devices': { icon: MapPin, color: 'from-green-500 to-emerald-600', bg: 'bg-green-50', text: 'text-green-600' },
-  'Printers': { icon: Printer, color: 'from-blue-500 to-cyan-600', bg: 'bg-blue-50', text: 'text-blue-600' },
-  'Smartwatches': { icon: Watch, color: 'from-pink-500 to-rose-600', bg: 'bg-pink-50', text: 'text-pink-600' },
-  'Cables & Accessories': { icon: Cable, color: 'from-orange-500 to-amber-600', bg: 'bg-orange-50', text: 'text-orange-600' },
-  'Printer Supplies': { icon: Box, color: 'from-teal-500 to-cyan-600', bg: 'bg-teal-50', text: 'text-teal-600' },
-  'Business Equipment': { icon: Package, color: 'from-slate-500 to-gray-600', bg: 'bg-slate-50', text: 'text-slate-600' },
+  'Biometric Devices': { icon: Cpu, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  'GPS Devices': { icon: MapPin, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  'Printers': { icon: Printer, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  'Smartwatches': { icon: Watch, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  'Cables & Accessories': { icon: Cable, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  'Printer Supplies': { icon: Box, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  'Business Equipment': { icon: Package, color: 'from-indigo-600 to-blue-600', bg: 'bg-indigo-50', text: 'text-indigo-600' },
 };
 
 export default function Products({ isAuthenticated, setIsAuthenticated }) {
