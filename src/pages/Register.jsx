@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Phone, ShoppingBag, CheckCircle, PartyPopper, AlertCircle, Eye, EyeOff, Check, X } from 'lucide-react';
+import { User, Mail, Lock, Phone, ShoppingBag, CheckCircle, PartyPopper, AlertCircle, Eye, EyeOff, Check, X, MapPin, Home, Building } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../config/api';
@@ -55,6 +55,36 @@ const validators = {
       return '';
     },
     hint: 'Re-enter your password'
+  },
+  street: {
+    validate: (value) => {
+      if (!value.trim()) return 'Street address is required';
+      if (value.trim().length < 5) return 'Please enter a valid street address';
+      return '';
+    },
+    hint: 'Enter your street address'
+  },
+  city: {
+    validate: (value) => {
+      if (!value.trim()) return 'City is required';
+      return '';
+    },
+    hint: 'Enter your city'
+  },
+  state: {
+    validate: (value) => {
+      if (!value.trim()) return 'State is required';
+      return '';
+    },
+    hint: 'Enter your state'
+  },
+  pincode: {
+    validate: (value) => {
+      if (!value.trim()) return 'PIN code is required';
+      if (!/^\d{6}$/.test(value.trim())) return 'Enter a valid 6-digit PIN code';
+      return '';
+    },
+    hint: 'Enter 6-digit PIN code'
   }
 };
 
@@ -178,7 +208,11 @@ export default function Register({ setIsAuthenticated }) {
     email: '',
     phone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    street: '',
+    city: '',
+    state: '',
+    pincode: ''
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -237,7 +271,7 @@ export default function Register({ setIsAuthenticated }) {
     });
 
     setErrors(newErrors);
-    setTouched({ fullname: true, email: true, phone: true, password: true, confirmPassword: true });
+    setTouched({ fullname: true, email: true, phone: true, password: true, confirmPassword: true, street: true, city: true, state: true, pincode: true });
     return isValid;
   };
 
@@ -253,7 +287,11 @@ export default function Register({ setIsAuthenticated }) {
     setLoading(true);
     
     try {
-      const { confirmPassword, ...dataToSend } = formData;
+      const { confirmPassword, street, city, state, pincode, ...basicData } = formData;
+      const dataToSend = {
+        ...basicData,
+        address: { street, city, state, pincode, country: 'India' }
+      };
       const response = await api.post('/auth/register', dataToSend);
       const { token, user } = response.data;
       
@@ -387,6 +425,13 @@ export default function Register({ setIsAuthenticated }) {
     { name: 'confirmPassword', label: 'Confirm Password', type: 'password', icon: Lock, placeholder: '••••••••', autocomplete: 'new-password' }
   ];
 
+  const addressFields = [
+    { name: 'street', label: 'Street Address', type: 'text', icon: Home, placeholder: '123 Main Street, Apartment 4B', autocomplete: 'street-address' },
+    { name: 'city', label: 'City', type: 'text', icon: Building, placeholder: 'Mumbai', autocomplete: 'address-level2' },
+    { name: 'state', label: 'State', type: 'text', icon: MapPin, placeholder: 'Maharashtra', autocomplete: 'address-level1' },
+    { name: 'pincode', label: 'PIN Code', type: 'text', icon: MapPin, placeholder: '400001', autocomplete: 'postal-code' }
+  ];
+
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
@@ -515,10 +560,85 @@ export default function Register({ setIsAuthenticated }) {
               );
             })}
 
+            {/* Address Section */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-6 pt-6 border-t border-gray-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                Shipping Address (Optional)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {addressFields.map((field, index) => {
+                  const Icon = field.icon;
+                  const hasError = errors[field.name] && touched[field.name];
+                  const isValid = formData[field.name] && !errors[field.name] && touched[field.name];
+                  
+                  return (
+                    <motion.div
+                      key={field.name}
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.65 + index * 0.05 }}
+                      className={field.name === 'street' ? 'md:col-span-2' : ''}
+                    >
+                      <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                        {field.label}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Icon className={`h-5 w-5 transition-colors duration-200 ${
+                            hasError ? 'text-red-400' : isValid ? 'text-green-500' : 'text-gray-400'
+                          }`} />
+                        </div>
+                        <input
+                          type={field.type}
+                          name={field.name}
+                          value={formData[field.name]}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          placeholder={field.placeholder}
+                          autoComplete={field.autocomplete}
+                          className={`w-full pl-10 pr-4 py-2.5 bg-white border-2 rounded-lg transition-all duration-200 ${
+                            hasError
+                              ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                              : isValid
+                              ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                              : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'
+                          } focus:ring-2 focus:outline-none`}
+                        />
+                        {isValid && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                          >
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          </motion.div>
+                        )}
+                      </div>
+                      {hasError && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-1 text-xs text-red-500"
+                        >
+                          {errors[field.name]}
+                        </motion.p>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
             <motion.button
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 0.9 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"

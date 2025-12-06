@@ -39,7 +39,8 @@ export default function OrderManager() {
         customer: {
           name: order.user?.fullname || order.shippingAddress?.fullname || 'Customer',
           email: order.user?.email || 'N/A',
-          phone: order.user?.phone || order.shippingAddress?.phone || 'N/A'
+          phone: order.user?.phone || order.shippingAddress?.phone || 'N/A',
+          registeredAddress: order.user?.address || null
         },
         items: order.items.map(item => ({
           name: item.name,
@@ -52,7 +53,7 @@ export default function OrderManager() {
         paymentMethod: order.paymentMethod,
         transactionId: order.transactionId || '',
         total: order.total,
-        shippingAddress: order.shippingAddress || {},
+        shippingAddress: order.shippingAddress || order.user?.address || {},
         orderDate: order.createdAt,
         tracking: order.tracking || {}
       }));
@@ -494,11 +495,31 @@ export default function OrderManager() {
 
               {/* Address */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Shipping Address</h3>
-                <p className="text-sm">
-                  {selectedOrder.shippingAddress?.street || 'N/A'}<br />
-                  {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} - {selectedOrder.shippingAddress?.pincode}
-                </p>
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  Shipping Address
+                </h3>
+                {selectedOrder.shippingAddress?.street || selectedOrder.shippingAddress?.city ? (
+                  <p className="text-sm">
+                    <span className="font-medium">{selectedOrder.shippingAddress?.fullname || selectedOrder.customer.name}</span><br />
+                    {selectedOrder.shippingAddress?.street || 'N/A'}<br />
+                    {selectedOrder.shippingAddress?.city}{selectedOrder.shippingAddress?.city && selectedOrder.shippingAddress?.state ? ', ' : ''}{selectedOrder.shippingAddress?.state}{selectedOrder.shippingAddress?.pincode ? ` - ${selectedOrder.shippingAddress?.pincode}` : ''}
+                    {selectedOrder.shippingAddress?.phone && (
+                      <><br /><span className="text-gray-500">📞 {selectedOrder.shippingAddress.phone}</span></>
+                    )}
+                  </p>
+                ) : selectedOrder.customer.registeredAddress?.street ? (
+                  <div>
+                    <p className="text-xs text-blue-600 mb-1">Using registered address:</p>
+                    <p className="text-sm">
+                      <span className="font-medium">{selectedOrder.customer.name}</span><br />
+                      {selectedOrder.customer.registeredAddress.street}<br />
+                      {selectedOrder.customer.registeredAddress.city}{selectedOrder.customer.registeredAddress.city && selectedOrder.customer.registeredAddress.state ? ', ' : ''}{selectedOrder.customer.registeredAddress.state}{selectedOrder.customer.registeredAddress.pincode ? ` - ${selectedOrder.customer.registeredAddress.pincode}` : ''}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No address provided</p>
+                )}
               </div>
 
               {/* Total */}
