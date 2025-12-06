@@ -262,8 +262,9 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
             <div className="flex flex-wrap gap-4 justify-center">
               <motion.button
                 onClick={() => navigate('/products')}
-                className="px-8 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
-                whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(255,255,255,0.2)' }}
+                className="px-8 py-3 rounded-lg font-semibold transition"
+                style={{ backgroundColor: '#00D8EC', color: '#000' }}
+                whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(0,216,236,0.3)' }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -273,8 +274,9 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
               </motion.button>
               <motion.button
                 onClick={() => navigate('/track')}
-                className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
-                whileHover={{ scale: 1.05, borderColor: '#00D8EC' }}
+                className="px-8 py-3 border-2 text-white rounded-lg font-semibold hover:bg-cyan-500/10 transition"
+                style={{ borderColor: '#00D8EC', color: '#00D8EC' }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -284,8 +286,9 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
               </motion.button>
               <motion.button
                 onClick={() => navigate('/about')}
-                className="px-8 py-3 border border-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
-                whileHover={{ scale: 1.05, borderColor: '#00D8EC' }}
+                className="px-8 py-3 border-2 text-white rounded-lg font-semibold hover:bg-cyan-500/10 transition"
+                style={{ borderColor: '#00D8EC', color: '#00D8EC' }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
