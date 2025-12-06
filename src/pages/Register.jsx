@@ -214,33 +214,19 @@ export default function Register() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Branding (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-blue-600 via-blue-700 to-sky-600 relative">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-sky-600 relative">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10 flex flex-col justify-center items-center w-full p-8 text-white">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4">
-            <ShoppingBag className="w-10 h-10 text-white" />
+        <div className="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
+          <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-6">
+            <ShoppingBag className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-3">Atlas & Arrow</h1>
-          <p className="text-lg text-white/80 text-center max-w-sm">Join thousands of happy customers shopping with us</p>
-          <div className="mt-8 grid grid-cols-3 gap-6 text-center">
-            <div>
-              <p className="text-2xl font-bold">10K+</p>
-              <p className="text-white/70 text-xs">Products</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold">50K+</p>
-              <p className="text-white/70 text-xs">Customers</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold">4.9★</p>
-              <p className="text-white/70 text-xs">Rating</p>
-            </div>
-          </div>
+          <h1 className="text-5xl font-bold mb-4">Atlas & Arrow</h1>
+          <p className="text-xl text-white/80 text-center max-w-md">Create an account to start shopping</p>
         </div>
       </div>
       
       {/* Right Panel - Form */}
-      <div className="w-full lg:w-7/12 flex flex-col bg-gray-50 overflow-y-auto">
+      <div className="w-full lg:w-1/2 flex flex-col bg-gray-50 overflow-y-auto">
         <div className="flex-1 flex flex-col justify-center px-4 py-6 sm:px-8 lg:px-12">
           {/* Mobile Header */}
           <div className="lg:hidden text-center mb-4">
