@@ -161,22 +161,25 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
           }
           @keyframes typing {
             0% { 
-              width: 0;
-              border-right-color: #00D8EC;
+              max-width: 0;
             }
-            50% { 
-              width: 100%;
-              border-right-color: #00D8EC;
-            }
-            50.1%, 100% {
-              width: 100%;
-              border-right-color: transparent;
+            50%, 100% { 
+              max-width: 100%;
             }
           }
+          @keyframes blink {
+            0%, 50% { border-right-color: #00D8EC; }
+            51%, 100% { border-right-color: transparent; }
+          }
           .animate-typing {
-            width: 0;
+            display: inline-block;
+            max-width: 0;
             white-space: nowrap;
-            animation: typing 4s steps(20) infinite;
+            overflow: hidden;
+            border-right: 3px solid #00D8EC;
+            animation: typing 3s steps(19) forwards, blink 0.7s step-end infinite;
+            vertical-align: bottom;
+            line-height: 1.2;
           }
         `}</style>
       </div>
@@ -188,8 +191,7 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
               Your Trusted Partner in
               <span className="block mt-2">
-                <span className="inline-block overflow-hidden border-r-4 animate-typing" 
-                      style={{color: '#00D8EC', borderColor: '#00D8EC'}}>
+                <span className="animate-typing" style={{color: '#00D8EC'}}>
                   Business Technology
                 </span>
               </span>
