@@ -116,9 +116,6 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
             
             {isAuthenticated ? (
               <>
-                <Link to="/wishlist" className="text-gray-700 hover:text-pink-600 transition" title="Wishlist">
-                  <Heart className="w-6 h-6" />
-                </Link>
                 <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 transition">
                   <ShoppingCart className="w-6 h-6" />
                   {cartCount > 0 && (
@@ -191,7 +188,6 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
             <Link to="/track" className="block text-gray-700 hover:text-blue-600" onClick={() => setMobileMenu(false)}>Track Order</Link>
             {isAuthenticated ? (
               <>
-                <Link to="/wishlist" className="block text-gray-700 hover:text-pink-600" onClick={() => setMobileMenu(false)}>Wishlist</Link>
                 <Link to="/cart" className="block text-gray-700 hover:text-blue-600" onClick={() => setMobileMenu(false)}>Cart ({cartCount})</Link>
                 <Link to="/notifications" className="block text-gray-700 hover:text-purple-600" onClick={() => setMobileMenu(false)}>Notifications</Link>
                 <Link to="/orders" className="block text-gray-700 hover:text-blue-600" onClick={() => setMobileMenu(false)}>Orders</Link>

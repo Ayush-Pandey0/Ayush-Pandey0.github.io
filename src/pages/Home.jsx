@@ -136,6 +136,15 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
     { text: "⚡ Flash Sale! Up to 40% off on Biometric Devices!", color: "text-cyan-300" },
   ];
 
+  // Hero carousel phrases
+  const heroSlides = [
+    'Business Technology',
+    'Biometric Solutions',
+    'GPS Tracking',
+    'Aadhaar Services'
+  ];
+  const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
+
   const [currentPromo, setCurrentPromo] = useState(0);
   const [isAnimating, setIsAnimating] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -159,6 +168,14 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
     }, 4000);
     
     return () => clearInterval(promoTimer);
+  }, []);
+
+  // Hero carousel timer
+  useEffect(() => {
+    const heroTimer = setInterval(() => {
+      setCurrentHeroSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 3000);
+    return () => clearInterval(heroTimer);
   }, []);
 
   useEffect(() => {
@@ -211,14 +228,14 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
             0%, 50% { border-right-color: #00D8EC; }
             51%, 100% { border-right-color: transparent; }
           }
-          .animate-typing {
-            display: inline-block;
-            max-width: 0;
-            white-space: nowrap;
-            overflow: visible;
-            border-right: 3px solid #00D8EC;
-            animation: typing 6s steps(19) infinite, blink 0.7s step-end infinite;
-            line-height: 1.3;
+          @keyframes slideUp {
+            0% { transform: translateY(100%); opacity: 0; }
+            10% { transform: translateY(0); opacity: 1; }
+            90% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
+          }
+          .animate-slideUp {
+            animation: slideUp 3s ease-in-out;
           }
         `}</style>
       </div>
@@ -229,9 +246,13 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6" style={{lineHeight: '1.3'}}>
               Your Trusted Partner in
-              <span className="block mt-2" style={{minHeight: '1.3em'}}>
-                <span className="animate-typing" style={{color: '#00D8EC'}}>
-                  Business Technology
+              <span className="block mt-2 h-16 md:h-20 overflow-hidden relative">
+                <span 
+                  key={currentHeroSlide}
+                  className="absolute inset-0 flex items-center justify-center animate-slideUp"
+                  style={{color: '#00D8EC'}}
+                >
+                  {heroSlides[currentHeroSlide]}
                 </span>
               </span>
             </h1>
