@@ -26,7 +26,7 @@ import ChangePassword from './pages/ChangePassword';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Google OAuth Client ID - Replace with your own from Google Cloud Console
-const GOOGLE_CLIENT_ID = '441065953286-rlq4m2s9c25ra23i9sctgr6v8kha4nvk.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '204796115276-8ocer6h76jd26fa5t897ttvqdh9ffoip.apps.googleusercontent.com';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
