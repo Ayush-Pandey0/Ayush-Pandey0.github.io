@@ -256,7 +256,7 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
                     <Star key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                   ))}
                 </div>
-                <span className="ml-2 text-gray-600">({product.rating} / 5.0)</span>
+                <span className="ml-2 text-gray-600">{product.rating?.toFixed(1) || '0.0'} ({product.numReviews || reviews.length || 0} reviews)</span>
               </div>
 
               <div className="mb-6">
@@ -280,13 +280,6 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
                 <button onClick={handleAddToCart} disabled={adding} className="flex-1 bg-gradient-to-r from-blue-600 to-sky-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 flex items-center justify-center">
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   {adding ? 'Adding...' : 'Add to Cart'}
-                </button>
-
-                <button 
-                  onClick={toggleWishlist}
-                  className={`p-3 rounded-lg border-2 transition ${inWishlist ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-red-300'}`}
-                >
-                  <Heart className={`w-6 h-6 ${inWishlist ? 'text-red-500 fill-current' : 'text-gray-600'}`} />
                 </button>
               </div>
 
