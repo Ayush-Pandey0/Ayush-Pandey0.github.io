@@ -123,7 +123,7 @@ export default function ProductManager() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+                         (product.brand || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
@@ -250,11 +250,11 @@ export default function ProductManager() {
       price: product.price.toString(),
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
       stock: product.stock.toString(),
-      brand: product.brand,
-      warranty: product.warranty,
+      brand: product.brand || '',
+      warranty: product.warranty || '',
       featured: product.featured,
-      specifications: product.specifications.length ? product.specifications : [{ key: '', value: '' }],
-      features: product.features.length ? product.features : [''],
+      specifications: product.specifications && product.specifications.length > 0 ? product.specifications : [{ key: '', value: '' }],
+      features: product.features && product.features.length > 0 ? product.features : [''],
       image: existingImage
     });
     setImagePreview(existingImage);
