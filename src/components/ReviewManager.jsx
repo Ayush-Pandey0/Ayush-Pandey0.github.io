@@ -56,42 +56,84 @@ export default function ReviewManager() {
     }
   };
 
-  const handleApprove = (id) => {
-    setReviews(reviews.map(r => 
-      r.id === id ? { ...r, status: 'approved' } : r
-    ));
-  };
-
-  const handleReject = (id) => {
-    setReviews(reviews.map(r => 
-      r.id === id ? { ...r, status: 'rejected' } : r
-    ));
-  };
-
-  const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this review?')) {
-      setReviews(reviews.filter(r => r.id !== id));
+  const handleApprove = async (review) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      await api.put(`/admin/reviews/${review.productId}/${review.id}/status`, 
+        { status: 'approved' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setReviews(reviews.map(r => 
+        r.id === review.id ? { ...r, status: 'approved' } : r
+      ));
+    } catch (error) {
+      console.error('Error approving review:', error);
+      alert('Failed to approve review');
     }
   };
 
-  const handleReply = () => {
+  const handleReject = async (review) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      await api.put(`/admin/reviews/${review.productId}/${review.id}/status`, 
+        { status: 'rejected' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setReviews(reviews.map(r => 
+        r.id === review.id ? { ...r, status: 'rejected' } : r
+      ));
+    } catch (error) {
+      console.error('Error rejecting review:', error);
+      alert('Failed to reject review');
+    }
+  };
+
+  const handleDelete = async (review) => {
+    if (confirm('Are you sure you want to delete this review?')) {
+      try {
+        const token = sessionStorage.getItem('token');
+        await api.delete(`/admin/reviews/${review.productId}/${review.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setReviews(reviews.filter(r => r.id !== review.id));
+      } catch (error) {
+        console.error('Error deleting review:', error);
+        alert('Failed to delete review');
+      }
+    }
+  };
+
+  const handleReply = async () => {
     if (!replyText.trim() || !selectedReview) return;
     
-    setReviews(reviews.map(r => 
-      r.id === selectedReview.id 
-        ? { 
-            ...r, 
-            reply: { 
-              text: replyText, 
-              date: new Date().toISOString().split('T')[0] 
+    try {
+      const token = sessionStorage.getItem('token');
+      await api.post(`/admin/reviews/${selectedReview.productId}/${selectedReview.id}/reply`,
+        { reply: replyText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setReviews(reviews.map(r => 
+        r.id === selectedReview.id 
+          ? { 
+              ...r, 
+              reply: { 
+                text: replyText, 
+                date: new Date().toISOString().split('T')[0],
+                by: 'Admin'
+              } 
             } 
-          } 
-        : r
-    ));
-    
-    setReplyText('');
-    setShowReplyModal(false);
-    setSelectedReview(null);
+          : r
+      ));
+      
+      setReplyText('');
+      setShowReplyModal(false);
+      setSelectedReview(null);
+      alert('Reply sent! User will be notified.');
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      alert('Failed to send reply');
+    }
   };
 
   const openReplyModal = (review) => {
@@ -312,14 +354,14 @@ export default function ReviewManager() {
                         {review.status === 'pending' && (
                           <>
                             <button
-                              onClick={() => handleApprove(review.id)}
+                              onClick={() => handleApprove(review)}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm"
                             >
                               <Check className="w-4 h-4" />
                               Approve
                             </button>
                             <button
-                              onClick={() => handleReject(review.id)}
+                              onClick={() => handleReject(review)}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm"
                             >
                               <X className="w-4 h-4" />
@@ -335,7 +377,7 @@ export default function ReviewManager() {
                           {review.reply ? 'Edit Reply' : 'Reply'}
                         </button>
                         <button
-                          onClick={() => handleDelete(review.id)}
+                          onClick={() => handleDelete(review)}
                           className="flex items-center gap-1.5 px-3 py-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition text-sm"
                         >
                           <Trash2 className="w-4 h-4" />
