@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Smartphone, Lock, CheckCircle, X, QrCode, ArrowLeft, Copy, Clock } from 'lucide-react';
+import { CreditCard, Smartphone, Lock, CheckCircle, X, QrCode, ArrowLeft, Copy, Clock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -18,7 +18,7 @@ export default function PaymentGateway({ setIsAuthenticated }) {
   const navigate = useNavigate();
   const orderData = location.state?.orderData;
   
-  const [paymentMethod, setPaymentMethod] = useState('upi_qr');
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [processing, setProcessing] = useState(false);
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
@@ -33,6 +33,121 @@ export default function PaymentGateway({ setIsAuthenticated }) {
   const [createdOrder, setCreatedOrder] = useState(null);
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+
+  useEffect(() => {
+    if (!orderData || !orderData.items || orderData.items.length === 0) {
+      toast.error('No order data found. Please go through checkout.');
+      navigate('/cart');
+    }
+  }, [orderData, navigate]);
+
+  // Razorpay Payment Handler
+  const handleRazorpayPayment = async () => {
+    setProcessing(true);
+    
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        toast.error('Please login to continue');
+        navigate('/login');
+        return;
+      }
+
+      // Create Razorpay order
+      const orderResponse = await api.post('/payment/create-order', {
+        amount: orderData.total,
+        currency: 'INR',
+        receipt: `order_${Date.now()}`,
+        notes: { 
+          customer_name: orderData.shippingAddress?.fullname,
+          customer_phone: orderData.shippingAddress?.phone
+        }
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const { order_id, key_id, amount } = orderResponse.data;
+
+      // Get user info
+      const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+
+      const options = {
+        key: key_id,
+        amount: amount,
+        currency: 'INR',
+        name: 'Atlas & Arrow',
+        description: 'Order Payment',
+        order_id: order_id,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            const verifyResponse = await api.post('/payment/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (verifyResponse.data.success) {
+              // Create order in database
+              const orderPayload = {
+                items: orderData.items.map(item => ({
+                  product: item.product._id || item.product,
+                  quantity: item.quantity
+                })),
+                shippingAddress: orderData.shippingAddress || {},
+                paymentMethod: 'RAZORPAY',
+                transactionId: response.razorpay_payment_id,
+                paymentStatus: 'completed',
+                couponCode: orderData.couponCode || null,
+                couponDiscount: orderData.couponDiscount || 0,
+                notes: `Razorpay Payment | Order ID: ${response.razorpay_order_id}`
+              };
+
+              const createOrderResponse = await api.post('/orders', orderPayload, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              setCreatedOrder(createOrderResponse.data.order);
+              setShowSuccess(true);
+              toast.success('Payment successful!');
+              
+              setTimeout(() => {
+                navigate('/orders');
+              }, 3000);
+            }
+          } catch (error) {
+            toast.error('Payment verification failed');
+            setProcessing(false);
+          }
+        },
+        prefill: {
+          name: orderData.shippingAddress?.fullname || user.fullname || '',
+          email: user.email || '',
+          contact: orderData.shippingAddress?.phone || user.phone || ''
+        },
+        theme: {
+          color: '#2563EB'
+        },
+        modal: {
+          ondismiss: function() {
+            setProcessing(false);
+            toast.error('Payment cancelled');
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      setProcessing(false);
+      
+    } catch (error) {
+      console.error('Razorpay error:', error);
+      toast.error(error.response?.data?.message || 'Failed to initiate payment');
+      setProcessing(false);
+    }
+  };
 
   useEffect(() => {
     if (!orderData || !orderData.items || orderData.items.length === 0) {
@@ -336,7 +451,20 @@ export default function PaymentGateway({ setIsAuthenticated }) {
             {/* Payment Methods */}
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <h2 className="text-xl font-bold mb-4">Select Payment Method</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
+                <button
+                  onClick={() => setPaymentMethod('razorpay')}
+                  className={`p-4 border-2 rounded-xl transition relative ${
+                    paymentMethod === 'razorpay' ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
+                  }`}
+                >
+                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    Recommended
+                  </div>
+                  <Zap className={`w-10 h-10 mx-auto mb-2 ${paymentMethod === 'razorpay' ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <div className="font-semibold text-sm">Razorpay</div>
+                  <div className="text-xs text-gray-500">Cards, UPI, Wallets</div>
+                </button>
                 <button
                   onClick={() => setPaymentMethod('upi_qr')}
                   className={`p-4 border-2 rounded-xl transition ${
@@ -345,7 +473,7 @@ export default function PaymentGateway({ setIsAuthenticated }) {
                 >
                   <QrCode className={`w-10 h-10 mx-auto mb-2 ${paymentMethod === 'upi_qr' ? 'text-blue-600' : 'text-gray-400'}`} />
                   <div className="font-semibold text-sm">UPI QR Code</div>
-                  <div className="text-xs text-gray-500">GPay, PhonePe, Paytm</div>
+                  <div className="text-xs text-gray-500">Scan & Pay</div>
                 </button>
                 <button
                   onClick={() => setPaymentMethod('card')}
@@ -354,11 +482,69 @@ export default function PaymentGateway({ setIsAuthenticated }) {
                   }`}
                 >
                   <CreditCard className={`w-10 h-10 mx-auto mb-2 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'}`} />
-                  <div className="font-semibold text-sm">Card Payment</div>
-                  <div className="text-xs text-gray-500">Credit / Debit</div>
+                  <div className="font-semibold text-sm">Manual</div>
+                  <div className="text-xs text-gray-500">Bank Transfer</div>
                 </button>
               </div>
             </div>
+
+            {/* Razorpay Payment */}
+            {paymentMethod === 'razorpay' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white p-6 rounded-xl shadow-lg"
+              >
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Zap className="w-6 h-6 text-blue-600" />
+                  Pay with Razorpay
+                </h2>
+                
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center">
+                  <div className="mb-4">
+                    <p className="text-gray-600 mb-2">Total Amount</p>
+                    <p className="text-4xl font-bold text-green-600">₹{orderData.total?.toLocaleString()}</p>
+                  </div>
+                  
+                  <div className="flex flex-wrap justify-center gap-3 mb-6">
+                    <span className="bg-white px-3 py-1 rounded-full text-sm text-gray-600 shadow-sm">💳 Credit Card</span>
+                    <span className="bg-white px-3 py-1 rounded-full text-sm text-gray-600 shadow-sm">💳 Debit Card</span>
+                    <span className="bg-white px-3 py-1 rounded-full text-sm text-gray-600 shadow-sm">📱 UPI</span>
+                    <span className="bg-white px-3 py-1 rounded-full text-sm text-gray-600 shadow-sm">💰 Net Banking</span>
+                    <span className="bg-white px-3 py-1 rounded-full text-sm text-gray-600 shadow-sm">👛 Wallets</span>
+                  </div>
+                  
+                  <button
+                    onClick={handleRazorpayPayment}
+                    disabled={processing}
+                    className="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg disabled:opacity-50 inline-flex items-center gap-2 text-lg"
+                  >
+                    {processing ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5" />
+                        Pay ₹{orderData.total?.toLocaleString()}
+                      </>
+                    )}
+                  </button>
+
+                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
+                    <Lock className="w-4 h-4" />
+                    Secured by Razorpay
+                  </div>
+                </div>
+
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
+                  <p className="text-green-800">
+                    <strong>✅ Instant Verification:</strong> Your payment will be verified automatically and order will be confirmed immediately.
+                  </p>
+                </div>
+              </motion.div>
+            )}
 
             {/* UPI QR Payment */}
             {paymentMethod === 'upi_qr' && (
