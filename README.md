@@ -43,11 +43,7 @@ A modern, full-stack e-commerce platform for biometric devices, GPS trackers, an
 ## 🔑 Access Credentials
 
 ### Admin Panel
-```
-URL: https://atlasarrow.me/admin-login
-Email: admin@atlas.com
-Password: arrow123
-```
+See `CREDENTIALS.txt` for admin login details (not committed to repo)
 
 ### Customer Account
 - Register at [atlasarrow.me/register](https://atlasarrow.me/register)
@@ -308,22 +304,20 @@ Push to main branch - auto-deploys on Render
 
 ## 🔒 Environment Variables
 
-### Backend (.env)
-```env
-MONGODB_URI=mongodb+srv://...
-JWT_SECRET=your_secret_key
-RAZORPAY_KEY_ID=rzp_live_...
-RAZORPAY_KEY_SECRET=...
-RESEND_API_KEY=re_...
-PORT=5000
-```
+See `CREDENTIALS.txt` for environment variable configuration (not committed to repo)
 
-### Frontend (Render env)
-```env
-VITE_API_URL=https://atlas-arrow-backend.onrender.com/api
-VITE_RAZORPAY_KEY_ID=rzp_live_...
-VITE_GOOGLE_CLIENT_ID=...
-```
+### Required Backend Variables
+- `MONGODB_URI` - MongoDB connection string
+- `JWT_SECRET` - JWT signing secret
+- `RAZORPAY_KEY_ID` - Razorpay API key
+- `RAZORPAY_KEY_SECRET` - Razorpay secret
+- `RESEND_API_KEY` - Email service API key
+- `PORT` - Server port (default: 5000)
+
+### Required Frontend Variables
+- `VITE_API_URL` - Backend API URL
+- `VITE_RAZORPAY_KEY_ID` - Razorpay public key
+- `VITE_GOOGLE_CLIENT_ID` - Google OAuth client ID
 
 ---
 
