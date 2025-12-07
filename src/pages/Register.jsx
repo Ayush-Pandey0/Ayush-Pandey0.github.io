@@ -76,7 +76,7 @@ const PasswordRequirements = ({ password }) => {
   );
 };
 
-export default function Register() {
+export default function Register({ setIsAuthenticated }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullname: '', email: '', phone: '', password: '', confirmPassword: '',
@@ -157,30 +157,25 @@ export default function Register() {
   // Google Sign Up
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
       try {
-        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-        });
-        const userInfo = await userInfoRes.json();
-        
         const response = await api.post('/auth/google', {
-          email: userInfo.email,
-          fullname: userInfo.name,
-          googleId: userInfo.sub,
-          picture: userInfo.picture
+          accessToken: tokenResponse.access_token
         });
 
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+          sessionStorage.setItem('token', response.data.token);
+          sessionStorage.setItem('user', JSON.stringify(response.data.user));
           setUserName(response.data.user.fullname);
           setSuccess(true);
           toast.success('Welcome to Atlas & Arrow!');
-          setTimeout(() => navigate('/'), 2000);
+          setTimeout(() => {
+            setIsAuthenticated(true);
+            navigate('/');
+          }, 2000);
         }
       } catch (error) {
         toast.error(error.response?.data?.message || 'Google sign-up failed');
-      } finally {
         setGoogleLoading(false);
       }
     },
