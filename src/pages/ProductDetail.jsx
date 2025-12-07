@@ -250,14 +250,27 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 text-sm font-semibold rounded-full mb-4">{product.category}</span>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
 
-              <div className="flex items-center mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                  ))}
+              {/* Only show rating if there are actual reviews */}
+              {(product.numReviews > 0 || reviews.length > 0) && (
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => {
+                      const actualRating = reviews.length > 0 
+                        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+                        : (product.rating || 0);
+                      return (
+                        <Star key={i} className={`w-5 h-5 ${i < Math.floor(actualRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                      );
+                    })}
+                  </div>
+                  <span className="ml-2 text-gray-600">
+                    {(reviews.length > 0 
+                      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) 
+                      : product.rating?.toFixed(1) || '0.0'
+                    )} ({product.numReviews || reviews.length || 0} reviews)
+                  </span>
                 </div>
-                <span className="ml-2 text-gray-600">{product.rating?.toFixed(1) || '0.0'} ({product.numReviews || reviews.length || 0} reviews)</span>
-              </div>
+              )}
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-4">
