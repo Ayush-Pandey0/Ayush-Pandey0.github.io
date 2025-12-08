@@ -11,6 +11,8 @@ export default function MessageManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [stats, setStats] = useState({ total: 0, unread: 0 });
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
     fetchMessages();
@@ -355,13 +357,60 @@ export default function MessageManager() {
               </div>
 
               <div className="mt-4 pt-4 border-t">
-                <a
-                  href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                <p className="text-sm text-gray-500 mb-2">Reply via Email:</p>
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Type your reply message here..."
+                  rows={4}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none mb-3"
+                />
+                <button
+                  onClick={async () => {
+                    if (!replyText.trim()) {
+                      toast.error('Please enter a reply message');
+                      return;
+                    }
+                    setSendingReply(true);
+                    try {
+                      const token = sessionStorage.getItem('token');
+                      const response = await api.post('/admin/messages/reply', {
+                        messageId: selectedMessage._id,
+                        to: selectedMessage.email,
+                        name: selectedMessage.name,
+                        subject: `Re: ${selectedMessage.subject}`,
+                        replyText: replyText
+                      }, {
+                        headers: { Authorization: `Bearer ${token}` }
+                      });
+                      
+                      if (response.data.success) {
+                        toast.success('Reply sent successfully!');
+                        setReplyText('');
+                        updateMessageStatus(selectedMessage._id, 'replied');
+                      }
+                    } catch (error) {
+                      console.error('Error sending reply:', error);
+                      toast.error(error.response?.data?.message || 'Failed to send reply');
+                    } finally {
+                      setSendingReply(false);
+                    }
+                  }}
+                  disabled={sendingReply || !replyText.trim()}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-4 h-4" />
-                  Reply via Email
-                </a>
+                  {sendingReply ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Reply
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           ) : (
