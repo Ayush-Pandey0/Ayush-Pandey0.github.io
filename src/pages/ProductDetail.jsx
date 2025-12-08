@@ -77,7 +77,8 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
           comment: review.comment || review.text || '',
           helpful: review.helpful || 0,
           verified: review.verified || false,
-          images: review.images || []
+          images: review.images || [],
+          reply: review.reply || null
         })));
       } else if (response.data?.reviews && Array.isArray(response.data.reviews)) {
         // Handle old format { reviews: [...] }
@@ -89,7 +90,8 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
           comment: review.comment || review.text || '',
           helpful: review.helpful || 0,
           verified: review.verified || false,
-          images: review.images || []
+          images: review.images || [],
+          reply: review.reply || null
         })));
       }
     } catch (error) {
@@ -473,6 +475,24 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
                       </div>
                     </div>
                     <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
+                    
+                    {/* Admin Reply */}
+                    {review.reply && review.reply.text && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4 ml-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">A</span>
+                          </div>
+                          <span className="text-sm font-medium text-blue-700">Admin Reply</span>
+                          {review.reply.date && (
+                            <span className="text-xs text-blue-500">
+                              • {new Date(review.reply.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-700 text-sm ml-8">{review.reply.text}</p>
+                      </div>
+                    )}
                     
                     {/* Review Images */}
                     {review.images && review.images.length > 0 && (
