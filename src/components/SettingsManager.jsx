@@ -19,7 +19,7 @@ export default function SettingsManager() {
     storeName: 'Atlas Arrow',
     tagline: 'Biometric, GPS & Technology Solutions',
     email: 'contact@atlasarrow.com',
-    phone: '+91 98765 43210',
+    phone: '',
     address: 'Golghar, Gorakhpur, Uttar Pradesh 273001',
     currency: 'INR',
     timezone: 'Asia/Kolkata',

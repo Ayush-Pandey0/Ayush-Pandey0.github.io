@@ -315,7 +315,7 @@ export default function Register({ setIsAuthenticated }) {
                     value={formData.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
                     onBlur={() => handleBlur('phone')}
-                    placeholder="9876543210"
+                    placeholder="Enter phone number"
                     className={`w-full px-3 py-2 text-sm border rounded-lg transition ${
                       touched.phone && errors.phone ? 'border-red-400' : 
                       touched.phone && !errors.phone && formData.phone ? 'border-green-400' : 'border-gray-300'
