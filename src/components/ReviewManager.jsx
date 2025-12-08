@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Star, MessageSquare, Reply, Trash2, Check, X, Search, Filter, User, Package, Clock, ThumbsUp, ThumbsDown, Flag, ChevronDown, Send } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Star, MessageSquare, Reply, Trash2, Check, X, Search, Filter, User, Package, Clock, ThumbsUp, ThumbsDown, Flag, ChevronDown, Send, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../config/api';
 
 export default function ReviewManager() {
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -308,11 +310,13 @@ export default function ReviewManager() {
               >
                 <div className="p-6">
                   <div className="flex items-start gap-4">
-                    {/* Product Image */}
+                    {/* Product Image - Clickable */}
                     <img
                       src={review.productImage}
                       alt={review.productName}
-                      className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                      onClick={() => navigate(`/product/${review.productId}`)}
+                      className="w-16 h-16 rounded-lg object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition"
+                      title="View product"
                     />
                     
                     <div className="flex-1 min-w-0">
@@ -320,7 +324,14 @@ export default function ReviewManager() {
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div>
                           <h3 className="font-semibold text-gray-900">{review.title}</h3>
-                          <p className="text-sm text-gray-500">{review.productName}</p>
+                          <p 
+                            onClick={() => navigate(`/product/${review.productId}`)}
+                            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer hover:underline flex items-center gap-1"
+                            title="View product"
+                          >
+                            {review.productName}
+                            <ExternalLink className="w-3 h-3" />
+                          </p>
                         </div>
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadge(review.status)}`}>
                           {review.status.charAt(0).toUpperCase() + review.status.slice(1)}

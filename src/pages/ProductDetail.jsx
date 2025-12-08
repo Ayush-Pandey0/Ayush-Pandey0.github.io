@@ -71,7 +71,19 @@ export default function ProductDetail({ isAuthenticated, setIsAuthenticated }) {
       if (response.data && Array.isArray(response.data)) {
         setReviews(response.data.map(review => ({
           id: review._id,
-          user: review.user?.fullname || 'Anonymous',
+          user: review.userName || review.user?.fullname || 'Anonymous',
+          rating: review.rating || 5,
+          date: review.createdAt,
+          comment: review.comment || review.text || '',
+          helpful: review.helpful || 0,
+          verified: review.verified || false,
+          images: review.images || []
+        })));
+      } else if (response.data?.reviews && Array.isArray(response.data.reviews)) {
+        // Handle old format { reviews: [...] }
+        setReviews(response.data.reviews.map(review => ({
+          id: review._id,
+          user: review.userName || review.user?.fullname || 'Anonymous',
           rating: review.rating || 5,
           date: review.createdAt,
           comment: review.comment || review.text || '',
