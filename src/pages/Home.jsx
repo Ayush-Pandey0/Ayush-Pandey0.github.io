@@ -13,7 +13,8 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
     totalCustomers: 0,
     totalProductsSold: 0,
     citiesServed: 0,
-    avgRating: 0
+    avgRating: 0,
+    reviewCount: 0
   });
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
@@ -104,7 +105,8 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
         totalCustomers: response.data.totalCustomers || 0,
         totalProductsSold: response.data.totalProductsSold || 0,
         citiesServed: response.data.citiesServed || 0,
-        avgRating: response.data.avgRating || 0
+        avgRating: response.data.avgRating || 0,
+        reviewCount: response.data.reviewCount || 0
       });
     } catch (error) {
       console.error('Failed to load stats:', error);
@@ -541,8 +543,12 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
               animate={statsVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.4 }}
             >
-              <div className="text-3xl md:text-4xl font-bold mb-1 text-cyan-400">{animatedStats.rating > 0 ? `${animatedStats.rating.toFixed(1)}/5` : '0/5'}</div>
-              <div className="text-gray-400 text-sm">Customer Rating</div>
+              <div className="text-3xl md:text-4xl font-bold mb-1 text-cyan-400">
+                {stats.reviewCount > 0 ? `${animatedStats.rating.toFixed(1)}/5` : 'N/A'}
+              </div>
+              <div className="text-gray-400 text-sm">
+                {stats.reviewCount > 0 ? `Customer Rating (${stats.reviewCount} reviews)` : 'No reviews yet'}
+              </div>
             </motion.div>
           </div>
         </div>
