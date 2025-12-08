@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Settings, Save, Store, User, Bell, Lock, Palette, Globe, Mail, CreditCard, Truck, Shield, Check, X, Upload, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Settings, Save, Store, User, Bell, Lock, Palette, Globe, Mail, CreditCard, Truck, Shield, Check, X, Upload, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../config/api';
@@ -8,6 +8,12 @@ export default function SettingsManager() {
   const [activeTab, setActiveTab] = useState('store');
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [storeLogo, setStoreLogo] = useState(null);
+  const [adminPhoto, setAdminPhoto] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const logoInputRef = useRef(null);
+  const photoInputRef = useRef(null);
 
   const [storeSettings, setStoreSettings] = useState({
     storeName: 'Atlas Arrow',
@@ -141,12 +147,78 @@ export default function SettingsManager() {
     const savedNotif = localStorage.getItem('notificationSettings');
     const savedPayment = localStorage.getItem('paymentSettings');
     const savedShipping = localStorage.getItem('shippingSettings');
+    const savedLogo = localStorage.getItem('storeLogo');
+    const savedPhoto = localStorage.getItem('adminPhoto');
     
     if (savedStore) setStoreSettings(JSON.parse(savedStore));
     if (savedNotif) setNotificationSettings(JSON.parse(savedNotif));
     if (savedPayment) setPaymentSettings(JSON.parse(savedPayment));
     if (savedShipping) setShippingSettings(JSON.parse(savedShipping));
+    if (savedLogo) setStoreLogo(savedLogo);
+    if (savedPhoto) setAdminPhoto(savedPhoto);
   }, []);
+
+  // Handle logo upload
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size should be less than 2MB');
+      return;
+    }
+    
+    setUploadingLogo(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setStoreLogo(reader.result);
+        localStorage.setItem('storeLogo', reader.result);
+        toast.success('Logo uploaded successfully!');
+        setUploadingLogo(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error('Failed to upload logo');
+      setUploadingLogo(false);
+    }
+  };
+
+  // Handle admin photo upload
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size should be less than 2MB');
+      return;
+    }
+    
+    setUploadingPhoto(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAdminPhoto(reader.result);
+        localStorage.setItem('adminPhoto', reader.result);
+        toast.success('Photo uploaded successfully!');
+        setUploadingPhoto(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error('Failed to upload photo');
+      setUploadingPhoto(false);
+    }
+  };
 
   const renderStoreSettings = () => (
     <div className="space-y-6">
@@ -224,13 +296,39 @@ export default function SettingsManager() {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Store Logo</label>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
-            AA
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 transition">
-            <Upload className="w-5 h-5" />
-            Upload New Logo
+          {storeLogo ? (
+            <img src={storeLogo} alt="Store Logo" className="w-20 h-20 rounded-xl object-cover" />
+          ) : (
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+              AA
+            </div>
+          )}
+          <input
+            type="file"
+            ref={logoInputRef}
+            onChange={handleLogoUpload}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            onClick={() => logoInputRef.current?.click()}
+            disabled={uploadingLogo}
+            className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+          >
+            {uploadingLogo ? (
+              <><div className="w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" /> Uploading...</>
+            ) : (
+              <><Upload className="w-5 h-5" /> Upload New Logo</>
+            )}
           </button>
+          {storeLogo && (
+            <button
+              onClick={() => { setStoreLogo(null); localStorage.removeItem('storeLogo'); toast.success('Logo removed'); }}
+              className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+            >
+              Remove
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -239,15 +337,38 @@ export default function SettingsManager() {
   const renderAdminSettings = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-6 pb-6 border-b">
-        <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-          A
-        </div>
+        {adminPhoto ? (
+          <img src={adminPhoto} alt="Admin" className="w-24 h-24 rounded-full object-cover" />
+        ) : (
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+            A
+          </div>
+        )}
         <div>
           <h3 className="text-xl font-semibold text-gray-900">Administrator</h3>
-          <p className="text-gray-500">admin@atlasarrow.com</p>
-          <button className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
-            Change Photo
+          <p className="text-gray-500">{adminSettings.email}</p>
+          <input
+            type="file"
+            ref={photoInputRef}
+            onChange={handlePhotoUpload}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            onClick={() => photoInputRef.current?.click()}
+            disabled={uploadingPhoto}
+            className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium disabled:opacity-50"
+          >
+            {uploadingPhoto ? 'Uploading...' : 'Change Photo'}
           </button>
+          {adminPhoto && (
+            <button
+              onClick={() => { setAdminPhoto(null); localStorage.removeItem('adminPhoto'); toast.success('Photo removed'); }}
+              className="mt-2 ml-4 text-red-600 hover:text-red-700 text-sm font-medium"
+            >
+              Remove
+            </button>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -565,23 +686,27 @@ export default function SettingsManager() {
 
   const renderSecuritySettings = () => (
     <div className="space-y-6">
-      <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-        <Shield className="w-6 h-6 text-green-600" />
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
+        <AlertCircle className="w-6 h-6 text-amber-600" />
         <div>
-          <p className="font-medium text-green-800">Your account is secure</p>
-          <p className="text-sm text-green-700">All security features are enabled</p>
+          <p className="font-medium text-amber-800">Basic Security Active</p>
+          <p className="text-sm text-amber-700">Password protection enabled. Additional features coming soon.</p>
         </div>
       </div>
       <div>
         <h4 className="font-medium text-gray-900 mb-4">Security Options</h4>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
             <div>
               <p className="font-medium text-gray-900">Two-Factor Authentication</p>
               <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Enable
+            <button
+              onClick={() => toast('Two-Factor Authentication will be available in a future update', { icon: '🔒' })}
+              className="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed"
+              title="Coming soon"
+            >
+              Coming Soon
             </button>
           </div>
           <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -589,39 +714,40 @@ export default function SettingsManager() {
               <p className="font-medium text-gray-900">Login Notifications</p>
               <p className="text-sm text-gray-500">Get notified when someone logs into your account</p>
             </div>
-            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50">
-              Configure
+            <button
+              onClick={() => toast.success('Login notifications are enabled by default')}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Enabled ✓
             </button>
           </div>
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
-              <p className="font-medium text-gray-900">Active Sessions</p>
-              <p className="text-sm text-gray-500">Manage devices where you're logged in</p>
+              <p className="font-medium text-gray-900">Change Password</p>
+              <p className="text-sm text-gray-500">Update your admin password</p>
             </div>
-            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50">
-              View All
+            <button
+              onClick={() => setActiveTab('admin')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Change
             </button>
           </div>
         </div>
       </div>
       <div className="pt-6 border-t">
-        <h4 className="font-medium text-gray-900 mb-4">Recent Login Activity</h4>
-        <div className="space-y-3">
-          {[
-            { device: 'Chrome on Windows', location: 'Gorakhpur, India', time: 'Current session' },
-            { device: 'Firefox on Android', location: 'Gorakhpur, India', time: '2 hours ago' },
-            { device: 'Safari on iPhone', location: 'Lucknow, India', time: '1 day ago' }
-          ].map((session, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium text-gray-900">{session.device}</p>
-                <p className="text-sm text-gray-500">{session.location}</p>
-              </div>
-              <span className={`text-sm ${index === 0 ? 'text-green-600' : 'text-gray-500'}`}>
-                {session.time}
-              </span>
+        <h4 className="font-medium text-gray-900 mb-4">Current Session</h4>
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-green-800">Active Session</p>
+              <p className="text-sm text-green-700">You are currently logged in as Admin</p>
             </div>
-          ))}
+            <span className="text-sm text-green-600 flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              Online
+            </span>
+          </div>
         </div>
       </div>
     </div>
