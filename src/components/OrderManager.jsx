@@ -455,7 +455,6 @@ export default function OrderManager() {
           </div>
         )}
       </motion.div>
-      </div>
 
       {/* Order Detail Modal */}
       <AnimatePresence>
