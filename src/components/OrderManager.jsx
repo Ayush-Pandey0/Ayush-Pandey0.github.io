@@ -360,7 +360,7 @@ export default function OrderManager() {
         >
           <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-blue-600 p-4 flex justify-between items-center">
+            <div className="sticky top-0 bg-blue-600 p-4 flex justify-between items-center z-10">
               <div className="text-white">
                 <h2 className="text-lg font-bold">Order Details</h2>
                 <p className="text-blue-100 text-xs font-mono">{selectedOrder.id}</p>
@@ -371,38 +371,192 @@ export default function OrderManager() {
             </div>
 
             <div className="p-4 space-y-4">
-              {/* Order Timeline */}
+              {/* Update Order Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                  <Truck className="w-5 h-5" />
+                  Update Order Status & Location
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Order Status</label>
+                    <select
+                      value={selectedOrder.status}
+                      onChange={(e) => {
+                        setSelectedOrder(prev => ({ ...prev, status: e.target.value }));
+                      }}
+                      className={`w-full px-3 py-2 rounded-lg font-medium border ${getStatusColor(selectedOrder.status)}`}
+                    >
+                      {statusOptions.map(status => (
+                        <option key={status} value={status}>{formatStatus(status)}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Current Location</label>
+                    <input
+                      type="text"
+                      value={localTracking.currentLocation}
+                      onChange={(e) => setLocalTracking(p => ({ ...p, currentLocation: e.target.value }))}
+                      placeholder="e.g., Mumbai Warehouse"
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Carrier</label>
+                    <input
+                      type="text"
+                      value={localTracking.carrier}
+                      onChange={(e) => setLocalTracking(p => ({ ...p, carrier: e.target.value }))}
+                      placeholder="e.g., BlueDart, Delhivery"
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Expected Delivery</label>
+                    <input
+                      type="date"
+                      value={localTracking.estimatedDelivery}
+                      onChange={(e) => setLocalTracking(p => ({ ...p, estimatedDelivery: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <button
+                  onClick={async () => {
+                    setUpdating(true);
+                    try {
+                      const token = sessionStorage.getItem('token');
+                      await api.put(`/admin/orders/${selectedOrder._id}`, { 
+                        status: selectedOrder.status,
+                        tracking: localTracking 
+                      }, {
+                        headers: { Authorization: `Bearer ${token}` }
+                      });
+                      
+                      setOrders(prev => prev.map(order => 
+                        order.id === selectedOrder.id 
+                          ? { ...order, status: selectedOrder.status, tracking: { ...order.tracking, ...localTracking } } 
+                          : order
+                      ));
+                      
+                      toast.success('Order updated successfully!');
+                    } catch (error) {
+                      toast.error('Failed to update order');
+                    } finally {
+                      setUpdating(false);
+                    }
+                  }}
+                  disabled={updating}
+                  className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
+                >
+                  {updating ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Update Order
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Tracking Journey */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-3 text-sm">Order Progress</h3>
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  Tracking Journey
+                </h3>
+                
+                {/* Journey Visual */}
+                <div className="flex items-center justify-between bg-white p-4 rounded-lg border mb-3">
+                  {/* Origin */}
+                  <div className="text-center flex-1">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <Package className="w-5 h-5 text-green-600" />
+                    </div>
+                    <p className="text-xs font-semibold text-gray-700">Origin</p>
+                    <p className="text-xs text-gray-500">Atlas Warehouse</p>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="h-0.5 bg-blue-300 flex-1"></div>
+                    <div className="mx-1 text-blue-500">→</div>
+                    <div className="h-0.5 bg-blue-300 flex-1"></div>
+                  </div>
+                  
+                  {/* Current Location */}
+                  <div className="text-center flex-1">
+                    <div className={`w-10 h-10 ${selectedOrder.tracking?.currentLocation ? 'bg-blue-100' : 'bg-gray-100'} rounded-full flex items-center justify-center mx-auto mb-1 ${selectedOrder.tracking?.currentLocation ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}>
+                      <Truck className={`w-5 h-5 ${selectedOrder.tracking?.currentLocation ? 'text-blue-600' : 'text-gray-400'}`} />
+                    </div>
+                    <p className="text-xs font-semibold text-gray-700">Current</p>
+                    <p className="text-xs text-blue-600 font-medium">
+                      {selectedOrder.tracking?.currentLocation || 'Not updated'}
+                    </p>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="h-0.5 bg-gray-300 flex-1"></div>
+                    <div className="mx-1 text-gray-400">→</div>
+                    <div className="h-0.5 bg-gray-300 flex-1"></div>
+                  </div>
+                  
+                  {/* Destination */}
+                  <div className="text-center flex-1">
+                    <div className={`w-10 h-10 ${selectedOrder.status === 'delivered' ? 'bg-green-100' : 'bg-gray-100'} rounded-full flex items-center justify-center mx-auto mb-1`}>
+                      <MapPin className={`w-5 h-5 ${selectedOrder.status === 'delivered' ? 'text-green-600' : 'text-gray-400'}`} />
+                    </div>
+                    <p className="text-xs font-semibold text-gray-700">Destination</p>
+                    <p className="text-xs text-gray-500">{selectedOrder.shippingAddress?.city || 'Customer'}</p>
+                  </div>
+                </div>
+                
+                {/* Status Timeline */}
                 <OrderTimeline 
                   status={selectedOrder.status} 
                   tracking={selectedOrder.tracking}
                   orderDate={selectedOrder.orderDate}
+                  compact={true}
                 />
+                
+                {/* Tracking Details */}
+                {(selectedOrder.tracking?.carrier || selectedOrder.tracking?.estimatedDelivery) && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
+                    <div className="flex flex-wrap gap-4">
+                      {selectedOrder.tracking?.carrier && (
+                        <span><span className="text-gray-500">Carrier:</span> <strong>{selectedOrder.tracking.carrier}</strong></span>
+                      )}
+                      {selectedOrder.tracking?.estimatedDelivery && (
+                        <span><span className="text-gray-500">Expected:</span> <strong className="text-green-600">{formatDate(selectedOrder.tracking.estimatedDelivery)}</strong></span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-                {/* Status Controls */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Order Status</label>
-                  <select
-                    value={selectedOrder.status}
-                    onChange={(e) => handleStatusChange(selectedOrder.id, selectedOrder._id, e.target.value)}
-                    disabled={updating}
-                    className={`w-full px-3 py-2 rounded-lg font-medium border ${getStatusColor(selectedOrder.status)} disabled:opacity-50`}
-                  >
-                    {statusOptions.map(status => (
-                      <option key={status} value={status}>{formatStatus(status)}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Payment Status</label>
+              {/* Payment Status */}
+              <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-sm text-green-800">Payment Status</h3>
+                    <p className="text-xs text-gray-500">Transaction: {selectedOrder.transactionId || 'N/A'}</p>
+                  </div>
                   <select
                     value={selectedOrder.paymentStatus}
                     onChange={(e) => handlePaymentStatusChange(selectedOrder.id, selectedOrder._id, e.target.value)}
                     disabled={updating}
-                    className={`w-full px-3 py-2 rounded-lg font-medium border ${getPaymentStatusColor(selectedOrder.paymentStatus)} disabled:opacity-50`}
+                    className={`px-3 py-1.5 rounded-lg font-medium border text-sm ${getPaymentStatusColor(selectedOrder.paymentStatus)} disabled:opacity-50`}
                   >
                     {paymentStatusOptions.map(status => (
                       <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
@@ -411,43 +565,7 @@ export default function OrderManager() {
                 </div>
               </div>
 
-              {/* Tracking */}
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <h3 className="font-semibold text-blue-800 mb-2 text-sm flex items-center gap-1">
-                  <MapPin className="w-4 h-4" /> Update Tracking
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    type="text"
-                    value={localTracking.currentLocation}
-                    onChange={(e) => setLocalTracking(p => ({ ...p, currentLocation: e.target.value }))}
-                    placeholder="Location"
-                    className="px-3 py-2 border rounded-lg text-sm"
-                  />
-                  <input
-                    type="text"
-                    value={localTracking.carrier}
-                    onChange={(e) => setLocalTracking(p => ({ ...p, carrier: e.target.value }))}
-                    placeholder="Carrier"
-                    className="px-3 py-2 border rounded-lg text-sm"
-                  />
-                  <input
-                    type="date"
-                    value={localTracking.estimatedDelivery}
-                    onChange={(e) => setLocalTracking(p => ({ ...p, estimatedDelivery: e.target.value }))}
-                    className="px-3 py-2 border rounded-lg text-sm"
-                  />
-                </div>
-                <button
-                  onClick={() => handleUpdateTracking(selectedOrder.id, selectedOrder._id, localTracking)}
-                  disabled={updating}
-                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
-                >
-                  {updating ? 'Updating...' : 'Update Tracking'}
-                </button>
-              </div>
-
-              {/* Customer & Payment Info */}
+              {/* Customer & Items */}
               <div className="grid md:grid-cols-2 gap-3">
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <h3 className="font-semibold text-sm mb-2">Customer</h3>
@@ -455,43 +573,33 @@ export default function OrderManager() {
                   <p className="text-xs text-gray-500">{selectedOrder.customer.email}</p>
                   <p className="text-xs text-gray-500">{selectedOrder.customer.phone}</p>
                 </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <h3 className="font-semibold text-sm mb-2">Payment</h3>
-                  <p className="text-sm"><span className="text-gray-500">Method:</span> {selectedOrder.paymentMethod || 'N/A'}</p>
-                  <p className="text-sm"><span className="text-gray-500">Transaction:</span> {selectedOrder.transactionId || 'N/A'}</p>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h3 className="font-semibold text-sm mb-2">Shipping Address</h3>
+                  {selectedOrder.shippingAddress?.street ? (
+                    <p className="text-xs text-gray-600">
+                      {selectedOrder.shippingAddress?.fullname || selectedOrder.customer.name}<br/>
+                      {selectedOrder.shippingAddress?.street}<br/>
+                      {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} - {selectedOrder.shippingAddress?.pincode}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-400">No address</p>
+                  )}
                 </div>
               </div>
 
               {/* Items */}
               <div className="bg-gray-50 p-3 rounded-lg">
-                <h3 className="font-semibold text-sm mb-2">Items</h3>
+                <h3 className="font-semibold text-sm mb-2">Items ({selectedOrder.items.length})</h3>
                 {selectedOrder.items.map((item, i) => (
-                  <div key={i} className="flex justify-between py-1 text-sm">
+                  <div key={i} className="flex justify-between py-1 text-sm border-b border-gray-200 last:border-0">
                     <span>{item.name} x{item.quantity}</span>
                     <span className="font-medium">₹{(item.price || 0).toLocaleString()}</span>
                   </div>
                 ))}
-              </div>
-
-              {/* Address */}
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h3 className="font-semibold text-sm mb-2">Shipping Address</h3>
-                {selectedOrder.shippingAddress?.street ? (
-                  <p className="text-sm text-gray-600">
-                    {selectedOrder.shippingAddress?.fullname || selectedOrder.customer.name}<br/>
-                    {selectedOrder.shippingAddress?.street}<br/>
-                    {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} - {selectedOrder.shippingAddress?.pincode}
-                    {selectedOrder.shippingAddress?.phone && <><br/>📞 {selectedOrder.shippingAddress.phone}</>}
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-400">No address provided</p>
-                )}
-              </div>
-
-              {/* Total */}
-              <div className="bg-gray-900 text-white p-3 rounded-lg flex justify-between items-center">
-                <span className="text-gray-400 text-sm">Total</span>
-                <span className="text-xl font-bold">₹{(selectedOrder.total || 0).toLocaleString()}</span>
+                <div className="flex justify-between pt-2 mt-2 border-t border-gray-300 font-bold">
+                  <span>Total</span>
+                  <span>₹{(selectedOrder.total || 0).toLocaleString()}</span>
+                </div>
               </div>
             </div>
           </div>
