@@ -61,22 +61,20 @@ export default function TrackOrder({ isAuthenticated, setIsAuthenticated }) {
       const response = await api.get(`/orders/track/${trackingId.trim()}`);
       const order = response.data;
       
+      // Get current location from tracking (what admin sets)
+      const currentLocation = order.tracking?.currentLocation || 'Atlas Arrow Warehouse';
+      
       // Build tracking data from order
       const trackingInfo = {
         orderId: order.orderNumber,
         status: order.status,
         estimatedDelivery: order.tracking?.estimatedDelivery || new Date(new Date(order.createdAt).getTime() + 7 * 24 * 60 * 60 * 1000),
-        currentLocation: order.tracking?.currentLocation || 'Atlas Arrow Warehouse',
+        currentLocation: currentLocation,
         customer: order.shippingAddress?.fullname || 'Customer',
         shippingAddress: `${order.shippingAddress?.street || ''}, ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} ${order.shippingAddress?.pincode || ''}`,
-        timeline: order.tracking?.timeline?.length > 0 ? order.tracking.timeline.map(t => ({
-          status: t.status,
-          date: new Date(t.date).toLocaleDateString(),
-          time: new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          location: t.location,
-          completed: t.completed,
-          description: t.description
-        })) : getDefaultTimeline(order),
+        // Always use getDefaultTimeline to generate proper timeline based on current status
+        // This avoids duplicate entries from backend
+        timeline: getDefaultTimeline(order),
         items: order.items.map(item => ({
           name: item.name,
           quantity: item.quantity,
@@ -106,6 +104,7 @@ export default function TrackOrder({ isAuthenticated, setIsAuthenticated }) {
     const createdDate = new Date(order.createdAt);
     const statuses = ['processing', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'];
     const currentStatusIndex = statuses.indexOf(order.status);
+    const currentLocation = order.tracking?.currentLocation || 'Atlas Arrow Warehouse';
     
     const timeline = [
       {
@@ -115,40 +114,56 @@ export default function TrackOrder({ isAuthenticated, setIsAuthenticated }) {
         location: 'Atlas Arrow Warehouse',
         completed: true,
         description: 'Your order has been placed and payment confirmed'
-      },
-      {
-        status: 'Processing',
-        date: createdDate.toLocaleDateString(),
-        time: new Date(createdDate.getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        location: 'Atlas Arrow Warehouse',
-        completed: currentStatusIndex >= 0,
-        description: 'Order is being prepared for shipment'
-      },
-      {
-        status: 'Shipped',
-        date: currentStatusIndex >= 2 ? new Date(createdDate.getTime() + 24 * 60 * 60 * 1000).toLocaleDateString() : 'Pending',
-        time: currentStatusIndex >= 2 ? '09:00 AM' : 'Expected',
-        location: 'Distribution Center',
-        completed: currentStatusIndex >= 2,
-        description: 'Package has been shipped and is on the way'
-      },
-      {
-        status: 'Out for Delivery',
-        date: currentStatusIndex >= 3 ? new Date(createdDate.getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Pending',
-        time: currentStatusIndex >= 3 ? '08:00 AM' : 'Expected',
-        location: 'Local Delivery Hub',
-        completed: currentStatusIndex >= 3,
-        description: 'Package is out for delivery'
-      },
-      {
-        status: 'Delivered',
-        date: currentStatusIndex >= 4 ? new Date(createdDate.getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Pending',
-        time: currentStatusIndex >= 4 ? '02:30 PM' : 'Expected',
-        location: 'Your Address',
-        completed: currentStatusIndex >= 4,
-        description: 'Package delivered to your address'
       }
     ];
+    
+    // Only add confirmed if status is confirmed or beyond
+    if (currentStatusIndex >= 1) {
+      timeline.push({
+        status: 'Confirmed',
+        date: new Date(createdDate.getTime() + 1 * 60 * 60 * 1000).toLocaleDateString(),
+        time: new Date(createdDate.getTime() + 1 * 60 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        location: 'Atlas Arrow Warehouse',
+        completed: true,
+        description: 'Your order has been confirmed'
+      });
+    }
+    
+    // Only add shipped if status is shipped or beyond
+    if (currentStatusIndex >= 2) {
+      timeline.push({
+        status: 'Shipped',
+        date: new Date(createdDate.getTime() + 24 * 60 * 60 * 1000).toLocaleDateString(),
+        time: new Date(createdDate.getTime() + 24 * 60 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        location: currentLocation,
+        completed: true,
+        description: 'Your order has been shipped and is on the way'
+      });
+    }
+    
+    // Only add out for delivery if status is out_for_delivery or beyond
+    if (currentStatusIndex >= 3) {
+      timeline.push({
+        status: 'Out for Delivery',
+        date: new Date(createdDate.getTime() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        time: new Date(createdDate.getTime() + 3 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        location: currentLocation,
+        completed: true,
+        description: 'Package is out for delivery'
+      });
+    }
+    
+    // Only add delivered if status is delivered
+    if (currentStatusIndex >= 4) {
+      timeline.push({
+        status: 'Delivered',
+        date: new Date(createdDate.getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        time: new Date(createdDate.getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        location: order.shippingAddress?.city || 'Your Address',
+        completed: true,
+        description: 'Package delivered to your address'
+      });
+    }
     
     return timeline;
   };
