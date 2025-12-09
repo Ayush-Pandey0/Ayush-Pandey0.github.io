@@ -101,7 +101,11 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
               </Link>
 
               {/* Location - Hidden on mobile */}
-              <div className="hidden lg:flex items-center gap-2 cursor-pointer group">
+              <Link 
+                to={isAuthenticated ? "/profile" : "/login"} 
+                className="hidden lg:flex items-center gap-2 cursor-pointer group"
+                title={isAuthenticated ? "Update your delivery location" : "Login to set location"}
+              >
                 <MapPin className="w-5 h-5 text-gray-500 group-hover:text-cyan-600 transition" />
                 <div className="flex flex-col">
                   <span className="text-[11px] text-gray-500">Deliver to</span>
@@ -109,7 +113,7 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
                     {user.city || 'Select location'}
                   </span>
                 </div>
-              </div>
+              </Link>
             </div>
 
             {/* Center - Search Bar */}
