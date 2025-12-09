@@ -164,14 +164,14 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
       {/* Main Navbar */}
       <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-6">
+          <div className="flex items-center justify-between h-20 gap-6">
             
             {/* Logo */}
             <Link to="/" className="flex-shrink-0">
               <img 
                 src="/logo.png" 
                 alt="Atlas & Arrow" 
-                className="h-12 md:h-14 lg:h-16 w-auto"
+                className="h-14 md:h-16 lg:h-18 w-auto"
               />
             </Link>
 
