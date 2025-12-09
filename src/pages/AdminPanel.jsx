@@ -85,7 +85,9 @@ export default function AdminPanel() {
       const reviews = Array.isArray(reviewsRes.data) ? reviewsRes.data : [];
 
       // Calculate stats
-      const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+      // Only count completed/delivered orders for revenue (exclude cancelled/failed orders)
+      const completedOrders = orders.filter(o => o.status === 'delivered' || o.status === 'completed');
+      const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
       const pendingOrders = orders.filter(o => o.status === 'processing' || o.status === 'confirmed').length;
       const lowStockItems = products.filter(p => (p.stock || 0) < 10).length;
       
@@ -97,11 +99,11 @@ export default function AdminPanel() {
       // Calculate monthly growth (compare with last month)
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-      const lastMonthOrders = orders.filter(o => {
+      const lastMonthOrders = completedOrders.filter(o => {
         const d = new Date(o.createdAt);
         return d >= lastMonth && d <= endOfLastMonth;
       });
-      const thisMonthOrders = orders.filter(o => new Date(o.createdAt) >= startOfMonth);
+      const thisMonthOrders = completedOrders.filter(o => new Date(o.createdAt) >= startOfMonth);
       const lastMonthRevenue = lastMonthOrders.reduce((sum, o) => sum + (o.total || 0), 0);
       const thisMonthRevenue = thisMonthOrders.reduce((sum, o) => sum + (o.total || 0), 0);
       const monthlyGrowth = lastMonthRevenue > 0 
