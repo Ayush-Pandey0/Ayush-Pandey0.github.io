@@ -3,6 +3,7 @@ import { Package, Truck, Clock, CheckCircle, XCircle, Search, Eye, AlertCircle, 
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../config/api';
+import OrderTimeline from './OrderTimeline';
 
 export default function OrderManager() {
   const [orders, setOrders] = useState([]);
@@ -379,6 +380,16 @@ export default function OrderManager() {
             </div>
 
             <div className="p-6 space-y-6">
+              {/* Order Timeline */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2 text-gray-700">Order Progress</h3>
+                <OrderTimeline 
+                  status={selectedOrder.status} 
+                  tracking={selectedOrder.tracking}
+                  orderDate={selectedOrder.orderDate}
+                />
+              </div>
+
               {/* Status Controls */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -413,7 +424,7 @@ export default function OrderManager() {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h3 className="font-semibold mb-3 flex items-center">
                   <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                  Tracking Information
+                  Update Tracking Information
                 </h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   <input

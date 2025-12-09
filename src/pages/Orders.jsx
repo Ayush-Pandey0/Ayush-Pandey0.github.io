@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../config/api';
 import Navbar from '../components/Navbar';
+import OrderTimeline from '../components/OrderTimeline';
 import toast from 'react-hot-toast';
-import { Package, Clock, CheckCircle, Truck, XCircle, RotateCcw, X } from 'lucide-react';
+import { Package, Clock, CheckCircle, Truck, XCircle, RotateCcw, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 const statusConfig = {
   processing: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Processing' },
@@ -17,6 +18,7 @@ const statusConfig = {
 export default function Orders({ setIsAuthenticated }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => { fetchOrders(); }, []);
 
@@ -98,84 +100,132 @@ export default function Orders({ setIsAuthenticated }) {
                 const statusInfo = getStatusInfo(order.status);
                 const StatusIcon = statusInfo.icon;
                 return (
-                  <div key={order._id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-bold text-lg">Order #{order.orderNumber}</span>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${statusInfo.color}`}>
-                            <StatusIcon className="w-3 h-3" />
-                            {statusInfo.label}
-                          </span>
-                        </div>
-                        <div className="text-sm text-gray-500 mb-2">
-                          {new Date(order.createdAt).toLocaleDateString('en-IN', { 
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {order.items?.length} item{order.items?.length !== 1 ? 's' : ''} • 
-                          Payment: {order.paymentMethod} • 
-                          {order.paymentStatus === 'completed' ? (
-                            <span className="text-green-600 font-medium"> Paid</span>
-                          ) : (
-                            <span className="text-yellow-600 font-medium"> {order.paymentStatus}</span>
+                  <div key={order._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+                    {/* Order Header */}
+                    <div 
+                      className="p-6 cursor-pointer"
+                      onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-bold text-lg">Order #{order.orderNumber}</span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${statusInfo.color}`}>
+                              <StatusIcon className="w-3 h-3" />
+                              {statusInfo.label}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-500 mb-2">
+                            {new Date(order.createdAt).toLocaleDateString('en-IN', { 
+                              day: 'numeric', 
+                              month: 'long', 
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {order.items?.length} item{order.items?.length !== 1 ? 's' : ''} • 
+                            Payment: {order.paymentMethod} • 
+                            {order.paymentStatus === 'completed' ? (
+                              <span className="text-green-600 font-medium"> Paid</span>
+                            ) : (
+                              <span className="text-yellow-600 font-medium"> {order.paymentStatus}</span>
+                            )}
+                          </div>
+                          {order.couponCode && (
+                            <div className="text-sm text-green-600 mt-1">
+                              Coupon applied: {order.couponCode} (-₹{order.couponDiscount?.toLocaleString()})
+                            </div>
                           )}
                         </div>
-                        {order.couponCode && (
-                          <div className="text-sm text-green-600 mt-1">
-                            Coupon applied: {order.couponCode} (-₹{order.couponDiscount?.toLocaleString()})
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-blue-600">₹{order.total?.toLocaleString()}</div>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {order.shippingAddress?.city}, {order.shippingAddress?.state}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600">₹{order.total?.toLocaleString()}</div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          {order.shippingAddress?.city}, {order.shippingAddress?.state}
+                          <div className="text-gray-400">
+                            {expandedOrder === order._id ? (
+                              <ChevronUp className="w-6 h-6" />
+                            ) : (
+                              <ChevronDown className="w-6 h-6" />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    
-                    {/* Order items preview */}
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="flex flex-wrap gap-2">
-                        {order.items?.slice(0, 3).map((item, idx) => (
-                          <div key={idx} className="bg-gray-50 px-3 py-1 rounded text-sm">
-                            {item.name} × {item.quantity}
-                          </div>
-                        ))}
-                        {order.items?.length > 3 && (
-                          <div className="bg-gray-100 px-3 py-1 rounded text-sm text-gray-500">
-                            +{order.items.length - 3} more
-                          </div>
-                        )}
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    {order.status?.toLowerCase() !== 'cancelled' && order.status?.toLowerCase() !== 'return requested' && (
-                      <div className="mt-4 pt-4 border-t flex gap-3">
-                        {canCancel(order.status) && (
-                          <button
-                            onClick={() => handleCancelOrder(order._id)}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition font-medium"
-                          >
-                            <X className="w-4 h-4" />
-                            Cancel Order
-                          </button>
+                    {/* Expanded Content with Timeline */}
+                    {expandedOrder === order._id && (
+                      <div className="border-t bg-gray-50">
+                        {/* Order Timeline */}
+                        <div className="p-6">
+                          <h3 className="font-semibold text-gray-700 mb-2">Order Status</h3>
+                          <OrderTimeline 
+                            status={order.status} 
+                            tracking={order.tracking}
+                            orderDate={order.createdAt}
+                          />
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="px-6 pb-4">
+                          <h3 className="font-semibold text-gray-700 mb-3">Items Ordered</h3>
+                          <div className="space-y-2">
+                            {order.items?.map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  {item.image && (
+                                    <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                                  )}
+                                  <div>
+                                    <p className="font-medium text-gray-800">{item.name}</p>
+                                    <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                  </div>
+                                </div>
+                                <p className="font-semibold text-gray-800">₹{(item.price * item.quantity).toLocaleString()}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Shipping Address */}
+                        {order.shippingAddress && (
+                          <div className="px-6 pb-4">
+                            <h3 className="font-semibold text-gray-700 mb-2">Shipping Address</h3>
+                            <div className="bg-white p-3 rounded-lg text-sm text-gray-600">
+                              <p className="font-medium text-gray-800">{order.shippingAddress.fullname}</p>
+                              <p>{order.shippingAddress.address}</p>
+                              <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}</p>
+                              <p>📞 {order.shippingAddress.phone}</p>
+                            </div>
+                          </div>
                         )}
-                        {canReturn(order.status) && (
-                          <button
-                            onClick={() => handleReturnOrder(order._id)}
-                            className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition font-medium"
-                          >
-                            <RotateCcw className="w-4 h-4" />
-                            Request Return
-                          </button>
+
+                        {/* Action Buttons */}
+                        {order.status?.toLowerCase() !== 'cancelled' && order.status?.toLowerCase() !== 'return requested' && (
+                          <div className="px-6 pb-6 flex gap-3">
+                            {canCancel(order.status) && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleCancelOrder(order._id); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition font-medium"
+                              >
+                                <X className="w-4 h-4" />
+                                Cancel Order
+                              </button>
+                            )}
+                            {canReturn(order.status) && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleReturnOrder(order._id); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition font-medium"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                                Request Return
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     )}
