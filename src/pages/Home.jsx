@@ -623,7 +623,7 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li><a href="mailto:atlasarrow75@gmail.com" className="hover:text-white transition">atlasarrow75@gmail.com</a></li>
-                <li><a href="tel:+919369914492" className="hover:text-white transition">+91 93699 144XX</a></li>
+                <li><a href="tel:+918423267608" className="hover:text-white transition">+91 84232 67608</a></li>
                 <li>Mumbai, Maharashtra</li>
                 <li><Link to="/contact" className="hover:text-white transition">Support Center</Link></li>
               </ul>

@@ -134,11 +134,11 @@ export default function PrivacyPolicy({ isAuthenticated, setIsAuthenticated }) {
                 </div>
                 <div className="flex items-center gap-3 text-gray-600">
                   <Phone className="w-5 h-5 text-blue-600" />
-                  <span>+91 93699 14492</span>
+                  <span>+91 84232 67608</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-600">
                   <MapPin className="w-5 h-5 text-blue-600" />
-                  <span>Gorakhpur, Uttar Pradesh, India</span>
+                  <span>Indira Nagar, Lucknow, Uttar Pradesh, India</span>
                 </div>
               </div>
             </section>

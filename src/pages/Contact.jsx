@@ -62,7 +62,7 @@ export default function Contact({ isAuthenticated, setIsAuthenticated }) {
     {
       icon: Phone,
       title: 'Phone',
-      details: '+91 93699 144XX',
+      details: '+91 84232 67608',
       subtext: 'Mon-Fri 9AM-6PM IST',
       color: 'text-green-600'
     },
@@ -76,8 +76,8 @@ export default function Contact({ isAuthenticated, setIsAuthenticated }) {
     {
       icon: MapPin,
       title: 'Office',
-      details: 'Gorakhpur, Uttar Pradesh',
-      subtext: 'Golghar, Near Railway Station',
+      details: 'Lucknow, Uttar Pradesh',
+      subtext: 'Indira Nagar',
       color: 'text-red-600'
     },
     {
@@ -303,7 +303,7 @@ export default function Contact({ isAuthenticated, setIsAuthenticated }) {
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <Phone className="w-5 h-5 mr-3" />
-                    <span>Call: +91 93699 144XX</span>
+                    <span>Call: +91 84232 67608</span>
                   </div>
                   <div className="flex items-center">
                     <Mail className="w-5 h-5 mr-3" />
@@ -360,24 +360,24 @@ export default function Contact({ isAuthenticated, setIsAuthenticated }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Visit Our Office</h2>
-            <p className="text-gray-600">Located in Gorakhpur, Uttar Pradesh - Near Golghar</p>
+            <p className="text-gray-600">Located in Lucknow, Uttar Pradesh - Indira Nagar</p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-lg h-96">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d114046.69693018498!2d83.3236513!3d26.7605545!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3991446a0c332489%3A0x1ff3f97fdcc6bfa2!2sGorakhpur%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1701500000000!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14238.590988498498!2d80.9919372!3d26.8748243!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399bfd7c3e9c1e6d%3A0x6e5a5d8a0e3c8b0a!2sIndira%20Nagar%2C%20Lucknow%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1701500000000!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Atlas & Arrow Office Location - Gorakhpur"
+              title="Atlas & Arrow Office Location - Lucknow"
             ></iframe>
           </div>
           <div className="mt-6 text-center">
             <div className="inline-flex items-center bg-white px-6 py-3 rounded-full shadow-md">
               <MapPin className="w-5 h-5 text-red-500 mr-2" />
-              <span className="text-gray-700 font-medium">Golghar, Gorakhpur, Uttar Pradesh 273001</span>
+              <span className="text-gray-700 font-medium">Indira Nagar, Lucknow, Uttar Pradesh 226016</span>
             </div>
           </div>
         </div>

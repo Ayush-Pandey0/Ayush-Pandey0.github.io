@@ -20,7 +20,7 @@ export default function SettingsManager() {
     tagline: 'Biometric, GPS & Technology Solutions',
     email: 'contact@atlasarrow.com',
     phone: '',
-    address: 'Golghar, Gorakhpur, Uttar Pradesh 273001',
+    address: 'Indira Nagar, Lucknow, Uttar Pradesh 226016',
     currency: 'INR',
     timezone: 'Asia/Kolkata',
     language: 'en'
@@ -646,7 +646,7 @@ export default function SettingsManager() {
             />
             <div>
               <p className="font-medium text-gray-900">Local Delivery</p>
-              <p className="text-sm text-gray-500">Delivery within Gorakhpur (1-2 days)</p>
+              <p className="text-sm text-gray-500">Delivery within Lucknow (1-2 days)</p>
             </div>
           </label>
           <label className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
