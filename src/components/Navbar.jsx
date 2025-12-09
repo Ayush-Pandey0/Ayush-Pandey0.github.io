@@ -1,4 +1,4 @@
-import { ShoppingCart, User, LogOut, Package, Menu, X, Heart, HelpCircle, MapPin, Search, Loader2 } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Menu, X, Heart, HelpCircle, MapPin, Search, Loader2, LocateFixed } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -9,8 +9,18 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userLocation, setUserLocation] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+
+  // Load saved location from localStorage on mount
+  useEffect(() => {
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+      setUserLocation(savedLocation);
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -73,6 +83,71 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
     }
   };
 
+  // Get user's current location using browser Geolocation API
+  const handleGetLocation = async (e) => {
+    e.preventDefault();
+    
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsLocating(true);
+    toast.loading('Detecting your location...', { id: 'location' });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // Use OpenStreetMap Nominatim API for reverse geocoding (free, no API key needed)
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
+          );
+          const data = await response.json();
+          
+          // Extract city name from response
+          const city = data.address?.city || 
+                       data.address?.town || 
+                       data.address?.village || 
+                       data.address?.state_district ||
+                       data.address?.county ||
+                       'Unknown Location';
+          
+          setUserLocation(city);
+          localStorage.setItem('userLocation', city);
+          toast.success(`Location set to ${city}`, { id: 'location' });
+        } catch (error) {
+          console.error('Reverse geocoding error:', error);
+          toast.error('Could not determine city name', { id: 'location' });
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            toast.error('Location permission denied. Please enable it in browser settings.', { id: 'location' });
+            break;
+          case error.POSITION_UNAVAILABLE:
+            toast.error('Location information unavailable', { id: 'location' });
+            break;
+          case error.TIMEOUT:
+            toast.error('Location request timed out', { id: 'location' });
+            break;
+          default:
+            toast.error('Could not get your location', { id: 'location' });
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // Cache for 5 minutes
+      }
+    );
+  };
+
   // Navigation categories
   const categories = [
     { name: 'Biometric Devices', path: '/products?category=Biometric Devices' },
@@ -101,19 +176,24 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
               </Link>
 
               {/* Location - Hidden on mobile */}
-              <Link 
-                to={isAuthenticated ? "/profile" : "/login"} 
-                className="hidden lg:flex items-center gap-2 cursor-pointer group"
-                title={isAuthenticated ? "Update your delivery location" : "Login to set location"}
+              <button 
+                onClick={handleGetLocation}
+                disabled={isLocating}
+                className="hidden lg:flex items-center gap-2 cursor-pointer group disabled:opacity-70"
+                title="Click to detect your location"
               >
-                <MapPin className="w-5 h-5 text-gray-500 group-hover:text-cyan-600 transition" />
+                {isLocating ? (
+                  <Loader2 className="w-5 h-5 text-cyan-600 animate-spin" />
+                ) : (
+                  <MapPin className="w-5 h-5 text-gray-500 group-hover:text-cyan-600 transition" />
+                )}
                 <div className="flex flex-col">
                   <span className="text-[11px] text-gray-500">Deliver to</span>
                   <span className="text-[13px] font-medium text-gray-900 underline group-hover:text-cyan-600 transition">
-                    {user.city || 'Select location'}
+                    {userLocation || user.city || 'Select location'}
                   </span>
                 </div>
-              </Link>
+              </button>
             </div>
 
             {/* Center - Search Bar */}
