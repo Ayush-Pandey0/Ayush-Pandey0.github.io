@@ -624,13 +624,13 @@ export default function Home({ isAuthenticated, setIsAuthenticated }) {
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li><a href="mailto:atlasarrow75@gmail.com" className="hover:text-white transition">atlasarrow75@gmail.com</a></li>
                 <li><a href="tel:+918423267608" className="hover:text-white transition">+91 84232 67608</a></li>
-                <li>Mumbai, Maharashtra</li>
-                <li><Link to="/contact" className="hover:text-white transition">Support Center</Link></li>
+                <li>Indira Nagar, Lucknow</li>
+                <li><Link to="/contact" className="hover:text-white transition">Contact Us</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-            <p>&copy; 2024 Atlas & Arrow. All rights reserved.</p>
+            <p>&copy; 2025 Atlas & Arrow. All rights reserved.</p>
           </div>
         </div>
       </footer>
