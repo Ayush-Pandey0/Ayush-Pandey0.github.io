@@ -164,42 +164,16 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
       {/* Main Navbar */}
       <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
+          <div className="flex items-center justify-between h-16 gap-6">
             
-            {/* Left Section - Logo & Location */}
-            <div className="flex items-center gap-8">
-              {/* Logo */}
-              <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-                <img 
-                  src="/logo.png" 
-                  alt="Atlas & Arrow" 
-                  className="h-10 md:h-12 w-auto"
-                />
-                <span className="text-xl md:text-2xl font-bold italic text-gray-900 tracking-wide hidden sm:block">
-                  Atlas & Arrow
-                </span>
-              </Link>
-
-              {/* Location - Hidden on mobile */}
-              <button 
-                onClick={handleGetLocation}
-                disabled={isLocating}
-                className="hidden lg:flex items-center gap-2 cursor-pointer group disabled:opacity-70"
-                title="Click to detect your location"
-              >
-                {isLocating ? (
-                  <Loader2 className="w-5 h-5 text-cyan-600 animate-spin" />
-                ) : (
-                  <MapPin className="w-5 h-5 text-gray-500 group-hover:text-cyan-600 transition" />
-                )}
-                <div className="flex flex-col">
-                  <span className="text-[11px] text-gray-500">Deliver to</span>
-                  <span className="text-[13px] font-medium text-gray-900 underline group-hover:text-cyan-600 transition">
-                    {userLocation || user.city || 'Select location'}
-                  </span>
-                </div>
-              </button>
-            </div>
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0">
+              <img 
+                src="/logo.png" 
+                alt="Atlas & Arrow" 
+                className="h-10 md:h-12 w-auto"
+              />
+            </Link>
 
             {/* Center - Search Bar */}
             <form onSubmit={handleSearch} className="flex-1 max-w-xl hidden md:block">
