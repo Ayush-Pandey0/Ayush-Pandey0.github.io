@@ -364,7 +364,7 @@ export default function Contact({ isAuthenticated, setIsAuthenticated }) {
           </div>
           <div className="rounded-2xl overflow-hidden shadow-lg h-96">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14238.590988498498!2d80.9919372!3d26.8748243!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399bfd7c3e9c1e6d%3A0x6e5a5d8a0e3c8b0a!2sIndira%20Nagar%2C%20Lucknow%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1701500000000!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.5!2d80.99!3d26.87!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399bfd991f32b16b%3A0x93ccba8909978be7!2sIndira%20Nagar%2C%20Lucknow%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1702100000000!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}
