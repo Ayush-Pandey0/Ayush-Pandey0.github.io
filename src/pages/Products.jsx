@@ -24,11 +24,22 @@ export default function Products({ isAuthenticated, setIsAuthenticated }) {
   const [wishlist, setWishlist] = useState([]);
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    search: '',
+    search: searchParams.get('search') || '',
     category: searchParams.get('category') || '',
     sort: 'latest'
   });
   const navigate = useNavigate();
+
+  // Update filters when URL search params change
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    const urlCategory = searchParams.get('category') || '';
+    setFilters(prev => ({
+      ...prev,
+      search: urlSearch,
+      category: urlCategory
+    }));
+  }, [searchParams]);
 
   // Group products by category
   const groupedProducts = useMemo(() => {
