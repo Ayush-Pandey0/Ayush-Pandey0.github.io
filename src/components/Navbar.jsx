@@ -92,10 +92,10 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
           <div className="flex items-center justify-between h-16 gap-4">
             
             {/* Left Section - Logo & Location */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-8">
               {/* Logo */}
               <Link to="/" className="flex-shrink-0">
-                <span className="text-2xl font-bold italic text-gray-900 tracking-wide">
+                <span className="text-3xl md:text-4xl font-bold italic text-gray-900 tracking-wide">
                   Atlas & Arrow
                 </span>
               </Link>
