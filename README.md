@@ -23,7 +23,6 @@ A modern, full-stack e-commerce platform for biometric devices, GPS trackers, an
 - **User Authentication** - Email/Password & Google OAuth sign-in
 - **Forgot Password** - OTP-based password reset via email
 - **Shopping Cart** - Add, update, remove items with quantity management
-- **Wishlist** - Save products for later
 - **Razorpay Payments** - Secure online payments with order verification
 - **Order Tracking** - Real-time order status updates
 - **Email Notifications** - Order confirmations and status updates
@@ -305,6 +304,32 @@ Push to main branch - auto-deploys on Render
 ## 🔒 Environment Variables
 
 See `CREDENTIALS.txt` for environment variable configuration (not committed to repo)
+
+---
+
+## 📧 How Email Works
+
+Atlas & Arrow uses the [Resend](https://resend.com/) transactional email API to send all order notifications, password resets, and welcome emails.
+
+- **Where is it hosted?**
+  - All outgoing emails are sent via the Resend cloud service (no SMTP server required).
+  - The backend (Node.js/Express, hosted on Render) connects to Resend using the `RESEND_API_KEY` environment variable.
+  - No email is sent from the frontend; all logic is in the backend (`server/server.js`).
+
+- **How does it work?**
+  - When a user places an order, resets their password, or registers, the backend triggers an email using the Resend API.
+  - Email templates are generated in code (HTML) and sent via HTTP requests to Resend.
+  - The sender address is set as `noreply@atlasarrow.me` (configured in backend code).
+
+- **Setup required:**
+  - You must set `RESEND_API_KEY` in your backend environment variables (see Render dashboard or `.env`).
+  - No additional mail server setup is needed.
+
+- **References:**
+  - [Resend API Docs](https://resend.com/docs)
+  - See `server/server.js` for implementation details (search for `Resend` and `sendOrderStatusEmail`).
+
+---
 
 ### Required Backend Variables
 - `MONGODB_URI` - MongoDB connection string
