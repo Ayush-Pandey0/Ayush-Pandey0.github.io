@@ -427,46 +427,72 @@ export default function OrderManager() {
                   </div>
                 </div>
                 
-                <button
-                  onClick={async () => {
-                    setUpdating(true);
-                    try {
-                      const token = sessionStorage.getItem('token');
-                      await api.put(`/admin/orders/${selectedOrder._id}`, { 
-                        status: selectedOrder.status,
-                        tracking: localTracking 
-                      }, {
-                        headers: { Authorization: `Bearer ${token}` }
-                      });
-                      
-                      setOrders(prev => prev.map(order => 
-                        order.id === selectedOrder.id 
-                          ? { ...order, status: selectedOrder.status, tracking: { ...order.tracking, ...localTracking } } 
-                          : order
-                      ));
-                      
-                      toast.success('Order updated successfully!');
-                    } catch (error) {
-                      toast.error('Failed to update order');
-                    } finally {
-                      setUpdating(false);
-                    }
-                  }}
-                  disabled={updating}
-                  className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
-                >
-                  {updating ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      Update Order
-                    </>
-                  )}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      setUpdating(true);
+                      try {
+                        const token = sessionStorage.getItem('token');
+                        await api.put(`/admin/orders/${selectedOrder._id}`, { 
+                          status: selectedOrder.status,
+                          tracking: localTracking 
+                        }, {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        
+                        setOrders(prev => prev.map(order => 
+                          order.id === selectedOrder.id 
+                            ? { ...order, status: selectedOrder.status, tracking: { ...order.tracking, ...localTracking } } 
+                            : order
+                        ));
+                        
+                        toast.success('Order updated successfully!');
+                      } catch (error) {
+                        toast.error('Failed to update order');
+                      } finally {
+                        setUpdating(false);
+                      }
+                    }}
+                    disabled={updating}
+                    className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
+                  >
+                    {updating ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4" />
+                        Update Order
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm('This will reset the tracking timeline and remove duplicate entries. Continue?')) return;
+                      setUpdating(true);
+                      try {
+                        const token = sessionStorage.getItem('token');
+                        await api.delete(`/admin/orders/${selectedOrder._id}/timeline`, {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        toast.success('Timeline reset! Duplicates removed.');
+                        fetchOrders(); // Refresh orders list
+                      } catch (error) {
+                        toast.error('Failed to reset timeline');
+                      } finally {
+                        setUpdating(false);
+                      }
+                    }}
+                    disabled={updating}
+                    className="px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 font-medium text-sm"
+                    title="Reset timeline to remove duplicates"
+                  >
+                    Reset Timeline
+                  </button>
+                </div>
               </div>
 
               {/* Tracking Journey */}
