@@ -26,14 +26,14 @@ export default function ReviewManager() {
       const response = await api.get('/reviews', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.length > 0) {
         // Map server reviews to the expected format
         const serverReviews = response.data.map((review, index) => ({
           id: review._id || index + 1,
           productId: review.product?._id || review.productId,
           productName: review.product?.name || review.productName || 'Product',
-          productImage: review.product?.images?.[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop',
+          productImage: review.productImage || review.product?.images?.[0] || '/logo.png',
           userId: review.user?._id || review.userId,
           userName: review.user?.fullname || review.userName || 'Anonymous',
           userEmail: review.user?.email || review.userEmail || '',
@@ -61,11 +61,11 @@ export default function ReviewManager() {
   const handleApprove = async (review) => {
     try {
       const token = sessionStorage.getItem('token');
-      await api.put(`/admin/reviews/${review.productId}/${review.id}/status`, 
+      await api.put(`/admin/reviews/${review.productId}/${review.id}/status`,
         { status: 'approved' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setReviews(reviews.map(r => 
+      setReviews(reviews.map(r =>
         r.id === review.id ? { ...r, status: 'approved' } : r
       ));
     } catch (error) {
@@ -77,11 +77,11 @@ export default function ReviewManager() {
   const handleReject = async (review) => {
     try {
       const token = sessionStorage.getItem('token');
-      await api.put(`/admin/reviews/${review.productId}/${review.id}/status`, 
+      await api.put(`/admin/reviews/${review.productId}/${review.id}/status`,
         { status: 'rejected' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setReviews(reviews.map(r => 
+      setReviews(reviews.map(r =>
         r.id === review.id ? { ...r, status: 'rejected' } : r
       ));
     } catch (error) {
@@ -107,27 +107,27 @@ export default function ReviewManager() {
 
   const handleReply = async () => {
     if (!replyText.trim() || !selectedReview) return;
-    
+
     try {
       const token = sessionStorage.getItem('token');
       await api.post(`/admin/reviews/${selectedReview.productId}/${selectedReview.id}/reply`,
         { reply: replyText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
-      setReviews(reviews.map(r => 
-        r.id === selectedReview.id 
-          ? { 
-              ...r, 
-              reply: { 
-                text: replyText, 
-                date: new Date().toISOString().split('T')[0],
-                by: 'Admin'
-              } 
-            } 
+
+      setReviews(reviews.map(r =>
+        r.id === selectedReview.id
+          ? {
+            ...r,
+            reply: {
+              text: replyText,
+              date: new Date().toISOString().split('T')[0],
+              by: 'Admin'
+            }
+          }
           : r
       ));
-      
+
       setReplyText('');
       setShowReplyModal(false);
       setSelectedReview(null);
@@ -168,14 +168,14 @@ export default function ReviewManager() {
   };
 
   const filteredReviews = reviews.filter(review => {
-    const matchesSearch = 
+    const matchesSearch =
       review.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.comment.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesRating = filterRating === 'all' || review.rating === parseInt(filterRating);
     const matchesStatus = filterStatus === 'all' || review.status === filterStatus;
-    
+
     return matchesSearch && matchesRating && matchesStatus;
   });
 
@@ -183,7 +183,7 @@ export default function ReviewManager() {
     total: reviews.length,
     approved: reviews.filter(r => r.status === 'approved').length,
     pending: reviews.filter(r => r.status === 'pending').length,
-    avgRating: reviews.length > 0 
+    avgRating: reviews.length > 0
       ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
       : 0
   };
@@ -318,13 +318,13 @@ export default function ReviewManager() {
                       className="w-16 h-16 rounded-lg object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition"
                       title="View product"
                     />
-                    
+
                     <div className="flex-1 min-w-0">
                       {/* Header */}
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div>
                           <h3 className="font-semibold text-gray-900">{review.title}</h3>
-                          <p 
+                          <p
                             onClick={() => navigate(`/product/${review.productId}`)}
                             className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer hover:underline flex items-center gap-1"
                             title="View product"
@@ -431,7 +431,7 @@ export default function ReviewManager() {
                   Responding to {selectedReview.userName}'s review on {selectedReview.productName}
                 </p>
               </div>
-              
+
               <div className="p-6">
                 {/* Original Review */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
